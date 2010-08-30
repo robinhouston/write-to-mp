@@ -47,7 +47,7 @@ The rest of these instructions assume you want to install it as a separate appli
    http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application
    (which you chose in step 1).
 5. Tell the application to download the list of MPs from TheyWorkForYou by going to
-   http://your-app-id.appspot.com/mp/cron/update
+   http://your-app-id.appspot.com/mp/cron/new_mps
    You will have to log in using your Google account at this point. As before, it will show
    a blank page.
 6. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list
