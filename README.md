@@ -24,7 +24,7 @@ The rest of these instructions assume you want to install it as a separate appli
 
 1. You need a Google account. If you have a GMail address, that will do. If not, you can make a Google account
    by filling in [this form](https://www.google.com/accounts/NewAccount).
-2. Download this application from <http://github.com/robinhouston/write-to-mp/downloads>.
+2. Download this application from <http://github.com/robinhouston/write-to-mp/downloads> and unzip it.
 3. Register for a [TheyWorkForYou API key](http://www.theyworkforyou.com/api/key).
 4. Edit the file `handlers.py` and insert your API key where indicated, on line 25 of the file.
 
@@ -68,7 +68,7 @@ the list of MPs as of 30 August 2010.
 ### Setting up the advice
 
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
-advice. If you want your advice to be show as collapsible sections that can be expanded by
+advice. If you want your advice to be shown as collapsible sections that can be expanded by
 clicking, you have to format it in a specific way, like this:
     1. First collapsible section
     
@@ -85,9 +85,9 @@ a star is crucial. You may have to use some trial-and-error to get it right!
 You should also edit the file `mp/enter.html` and change the introductory text to explain
 your campaign. Delete everything between the markers
 
-    &lt;!-- v v Replace everything from this comment to the following one. v v --&gt;
+    <!-- v v Replace everything from this comment to the following one. v v -->
 and
-    &lt;!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ --&gt;
+    <!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ -->
 and replace it with the text you want, in HTML format. (You can just wrap each paragraph
 in a pair &lt;p&gt; &hellip; &lt;/p&gt;.)
 
