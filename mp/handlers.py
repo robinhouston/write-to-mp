@@ -22,7 +22,7 @@ md = markdown.Markdown()
 
 # Constants
 
-TWFY_API_KEY = "REPLACE_THIS_WITH_YOUR_API_KEY"
+TWFY_API_KEY = "ErYPNLEoRibdCMKksXD3dhTn"
 
 # Data
 
@@ -164,11 +164,15 @@ class LetterSentHandler(webapp.RequestHandler):
     #
     # 1. Uncomment the code immediately below.
     # 2. Uncomment the class TaskTwoWeeksLater and the reference to it in main().
-    # 3. Create plain text and HTML versions of the message you want to send, in
+    # 3. Put your sender email address in the marked place in TwoWeeksLater. This
+    #    must be an authorised sender address by the app engine rules: the simplest
+    #    way to ensure this for an arbitrary address is to make a corresponding Google
+    #    account, and make that account an administrator of your application.
+    # 4. Create plain text and HTML versions of the message you want to send, in
     #    files email/two-weeks-later.txt and email/two-weeks-later.html. These are
     #    templates, so can contain the placeholders {{ name }} and {{ email }} which
     #    are replaced, respectively, with the name and email address of the recipient.
-    # 4. Add a task queue definition to queue.yaml, with queue name "write-to-mp".
+    # 5. Add a task queue definition to queue.yaml, with queue name "write-to-mp".
     
     # two_weeks_time = datetime.date.today() + datetime.timedelta(days=14)
     # eta = datetime.datetime(two_weeks_time.year, two_weeks_time.month, two_weeks_time.day, 9, 30)
@@ -471,7 +475,7 @@ class TaskUpdateMP(webapp.RequestHandler):
 #     
 #     mail.send_mail(
 #       subject = "Did you hear back from your MP?",
-#       sender = "10:10's Lighter Later <mail@lighterlater.org>",
+#       sender = "", # <- PUT YOUR SENDER ADDRESS HERE
 #       reply_to = "mpresponse@lighterlater.org",
 #       to = email,
 #       body = template.render("email/two-weeks-later.txt",  {"name": name, "email": email}),

@@ -1,5 +1,5 @@
 {% extends "template.html" %}
-{% block title %}10:10 Lighter Later | MP Admin{% endblock %}
+{% block title %}MP Admin{% endblock %}
 {% block body_attrs %}class="admin mp-admin"{% endblock %}
 {% block head %}
   <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
@@ -187,9 +187,7 @@
     });
   </script>
 {% endblock %}
-{% block header %}{% endblock %}
-{% block sidebar %}{% endblock %}
-{% block inner %}
+{% block body %}
   <h1>Members of Parliament</h1>
     {% if error %}
       <div class="error">{{ error|escape }}</div>

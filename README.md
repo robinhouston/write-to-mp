@@ -15,8 +15,8 @@ once they have composed it.
 ## How to install this application
 
 This code is distributed as an application that runs on [Google App Engine](http://code.google.com/appengine/).
-It can be incorporated into an existing App Engine site, or (more likely) run separately. For example, if your
-main web site is at www.example.org you could run this application on a subdomain such as mp.example.org.
+It can be incorporated into an existing App Engine site, or run separately. For example, if your main web site
+is at www.example.org you could run this application on a subdomain such as mp.example.org.
 
 The rest of these instructions assume you want to install it as a separate application.
 
@@ -35,7 +35,11 @@ The rest of these instructions assume you want to install it as a separate appli
 3. Choose "Add existing application", and select the directory containing this application.
 4. Click the Run button.
 5. Go to http://localhost:8080/mp/write in your web browser, and make sure a page appears.
-    * If you fill in the form here, it won't XXXX
+
+**For advanced users**: There is a test data set distributed with this code, in the file
+`data/test-data.sqlite`. You can tell the dev appserver to use this data file by passing
+the command-line options `--use_sqlite --datastore_path=data/test-data.sqlite`. This contains
+the list of MPs as of 30 August 2010.
 
 ### Get the real thing working
 
@@ -44,12 +48,12 @@ The rest of these instructions assume you want to install it as a separate appli
    `write-to-mp`.
 3. Click the Publish button in the Google App Engine Launcher.
 4. Check you can see the page you looked at on your computer by going to
-   http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application
-   (which you chose in step 1).
+   http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application,
+   which you chose in step 1.
 5. Tell the application to download the list of MPs from TheyWorkForYou by going to
    http://your-app-id.appspot.com/mp/cron/new_mps
-   You will have to log in using your Google account at this point. As before, it will show
-   a blank page.
+   You will have to log in using your Google account at this point. If this step works
+   correctly, you will see the message "Fetching new MPs in the background".
 6. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list
    and reloading it periodically to check that the list is updating.
 
@@ -61,15 +65,34 @@ The rest of these instructions assume you want to install it as a separate appli
 
 ## How to use it
 
+### Setting up the advice
+
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
 advice. If you use a numbered list of points, they will be turned into collapsible sections on
-the page
+the page.
 
-Before running a campaign you should check that <team@writetothem.com> are happy with it.
+You should also edit the file `mp/enter.html` and change the introductory text to explain
+your campaign. Delete everything between the markers
+
+    &lt;!-- v v Replace everything from this comment to the following one. v v --&gt;
+and
+    &lt;!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ --&gt;
+and replace it with the text you want, in HTML format. (You can just wrap each paragraph
+in a pair &lt;p&gt; &hellip; &lt;/p&gt;.)
+
+### Grouping MPs
+
+You can also create groups of MPs xxxx
+
+### Finally
+
+Before running a campaign you should check that <team@writetothem.com> are happy with it,
+since it relies on their service for sending the messages.
 
 ## Customising the appearance
 
-
+The appearance of the pages can be customised by editing the master template `mp/template.html`
+and the style sheet `styles/common.css`.
 
 ### History
 
