@@ -22,7 +22,7 @@ md = markdown.Markdown()
 
 # Constants
 
-TWFY_API_KEY = "ErYPNLEoRibdCMKksXD3dhTn"
+TWFY_API_KEY = "REPLACE_THIS_WITH_YOUR_API_KEY"
 
 # Data
 
