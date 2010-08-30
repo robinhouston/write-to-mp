@@ -24,7 +24,7 @@ The rest of these instructions assume you want to install it as a separate appli
 
 1. You need a Google account. If you have a GMail address, that will do. If not, you can make a Google account
    by filling in [this form](https://www.google.com/accounts/NewAccount).
-2. Download this application.
+2. Download this application from <http://github.com/robinhouston/write-to-mp/downloads>.
 3. Register for a [TheyWorkForYou API key](http://www.theyworkforyou.com/api/key).
 4. Edit the file `handlers.py` and insert your API key where indicated, on line 25 of the file.
 
