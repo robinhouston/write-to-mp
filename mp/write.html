@@ -1,4 +1,4 @@
-{% extends "../template.html" %}
+{% extends "template.html" %}
 {% block title %}10:10 Lighter Later | Email your MP{% endblock %}
 {% block body_attrs %}class="mp-write"{% endblock %}
 {% block head %}
@@ -49,14 +49,7 @@
     });
   </script>
 {% endblock %}
-{% block header %}
-<div id="header">
-  <h1><a href="/">10:10 Lighter Later</a></h1>
-  <h2>Email your MP</h2>
-</div>
-{% endblock %}
-{% block sidebar %}{% endblock %}
-{% block inner %}
+{% block body %}
   <div id="advice">
       <h2>Before you start</h2>
       <div id="general-advice">

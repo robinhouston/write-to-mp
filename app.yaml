@@ -1,4 +1,4 @@
-application: write-to-mp
+application: sizeablebackslash
 version: 1
 runtime: python
 api_version: 1
@@ -26,3 +26,13 @@ handlers:
 - url: /mp/.+
   login: admin
   script: mp/handlers.py
+
+# Static files
+#   /styles maps to the styles directory
+- url: /styles/(.+)
+  static_files: styles/\1
+  upload: styles/.+
+#  /lib maps to the jslib directory
+- url: /lib/(.+)
+  static_files: jslib/\1
+  upload: jslib/.+

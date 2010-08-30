@@ -48,8 +48,10 @@ The rest of these instructions assume you want to install it as a separate appli
    (which you chose in step 1).
 5. Tell the application to download the list of MPs from TheyWorkForYou by going to
    http://your-app-id.appspot.com/mp/cron/update
+   You will have to log in using your Google account at this point. As before, it will show
+   a blank page.
 6. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list
-   and reloading it periodically to check that the list is 
+   and reloading it periodically to check that the list is updating.
 
 ### Associate it with the domain name you want to use
 
@@ -60,7 +62,8 @@ The rest of these instructions assume you want to install it as a separate appli
 ## How to use it
 
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
-numbered points.
+advice. If you use a numbered list of points, they will be turned into collapsible sections on
+the page
 
 Before running a campaign you should check that <team@writetothem.com> are happy with it.
 

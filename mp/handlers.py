@@ -14,7 +14,7 @@ from google.appengine.ext import webapp
 import google.appengine.ext.webapp.util
 from google.appengine.ext.webapp import template
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "pylib"))
 import markdown
 
 md = markdown.Markdown()
@@ -357,6 +357,12 @@ class CronNewMPs(webapp.RequestHandler):
     assert result.headers["content-type"] == "text/javascript; charset=iso-8859-1"
     mps = json.loads(result.content.decode("latin-1").encode("utf-8"))
     
+    if "error" in mps:
+      logging.error("Error fetching new MPs: %s", mps["error"])
+      self.response.headers["Content-type"] = "text/plain; charset=utf-8"
+      self.response.out.write("Error: " + mps["error"])
+      return
+    
     tasks = []
 
     while mps:
@@ -374,6 +380,9 @@ class CronNewMPs(webapp.RequestHandler):
     while tasks:
       this_batch, tasks = tasks[:100], tasks[100:]
       queue.add(this_batch)
+    
+    self.response.headers["Content-type"] = "text/plain; charset=utf-8"
+    self.response.out.write("Fetching new MPs in the background")
   
   def _ensure_default_mp_group(self):
     if not MPGroup.get_by_key_name("Default"):

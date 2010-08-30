@@ -1,4 +1,4 @@
-{% extends "../template.html" %}
+{% extends "template.html" %}
 {% block title %}10:10 Lighter Later | Write to your MP{% endblock %}
 {% block body_attrs %}class="mp-enter"{% endblock %}
 {% block head %}
@@ -10,22 +10,14 @@
     </script>
   {% endif %}
 {% endblock %}
-{% block header %}
-<div id="header">
-  <h1><a href="/">10:10 Lighter Later</a></h1>
-    <img alt="" id="supporters" src="/styles/images/crowd3.jpg">
-</div>
-{% endblock %}
-{% block sidebar %}{% endblock %}
-{% block inner %}
+{% block body %}
   <div id="instructions">
     <h2>Why email your MP?</h2>
     
-    <p>Everybody loves the sunshine. But every year we set our clocks so that we get less of it in our lives, sleeping through the sunlit mornings while we use expensive, polluting electric light in the evenings. Lighter Later is a campaign to brighten all of our days, moving the clocks forward by one hour so that we are awake when the sun is out.</p>
-  
-  <p>This December a Lighter Later bill is going to Parliament and we need to make sure that enough MPs turn up and vote in favour. This tool will help you write a personalised letter to your own MP.</p>
-  
-  <p>Asking your MP to vote for the Private Member’s Bill is the most important thing you can do to make the Lighter Later plan a reality.</p>
+    <!-- v v Replace everything from this comment to the following one. v v -->
+    <p class="red">Edit the file <code>mp/enter.html</code> and put in an explanation of why you want people
+      to write to their MP.</p>
+    <!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ -->
   
   <p>Get started by entering your details to the right.</p>
   </div>

@@ -1,0 +1,11 @@
+body { font-family: "Lucida Grande", "Lucida Sans", sans-serif; width: 800px; margin-left: 1em; }
+
+.red { color: red; }
+.error { font-weight: bold; color: red; }
+
+.mp-enter #instructions { width: 350px; float: left; }
+.mp-enter #mp-form { width: 400px; float: left; margin: 4em 0 0 2em; position: relative; }
+body.mp-enter #mp-form form div { margin: 1em 0; position: relative; height: 1em; }
+body.mp-enter #mp-form form div label { position: absolute; left: 0; width: 130px; font-weight: bold; text-align: right; }
+body.mp-enter #mp-form form div .mpform-field { position: absolute; left: 140px; width: 170px; }
+.mp-enter #mp-form .mpform-submit { position: absolute; right: 60px; }
