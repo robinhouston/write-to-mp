@@ -68,8 +68,19 @@ the list of MPs as of 30 August 2010.
 ### Setting up the advice
 
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
-advice. If you use a numbered list of points, they will be turned into collapsible sections on
-the page.
+advice. If you want your advice to be show as collapsible sections that can be expanded by
+clicking, you have to format it in a specific way, like this:
+    1. First collapsible section
+    
+        * bullet point, which can have a whole paragraph of text.
+        * another bullet point
+    
+    2. Second collapsible section
+    
+        * bullet point here
+        * etc.
+Note that the placement of blank lines and the precise number of spaces before
+a star is crucial. You may have to use some trial-and-error to get it right!
 
 You should also edit the file `mp/enter.html` and change the introductory text to explain
 your campaign. Delete everything between the markers
