@@ -82,7 +82,9 @@ in a pair &lt;p&gt; &hellip; &lt;/p&gt;.)
 
 ### Grouping MPs
 
-You can also create groups of MPs xxxx
+You can also create groups of MPs, by clicking the "New group" button and entering
+appropriate text. You can add MPs to the group by typing their names, or by using
+the list interface and choosing the appropriate group from the dropdown menu.
 
 ### Finally
 
