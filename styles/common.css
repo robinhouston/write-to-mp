@@ -11,6 +11,7 @@ body { font-family: "Lucida Grande", "Lucida Sans", sans-serif; width: 800px; ma
 .mp-enter #mp-form .mpform-submit { position: absolute; right: 60px; }
 
 .mp-write { width: 900px; }
+.mp-write #mp-details #mp-photo { margin-right: 8px; }
 .mp-write #advice { float: left; width: 396px; padding: 0; margin-right: 1em; }
 .mp-write #advice #finally { font-size: 80%; margin-top: 2.5em; }
 .mp-write #advice #finally img { margin-top: 0.5em; }
