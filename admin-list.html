@@ -1,0 +1,124 @@
+{% extends "template.html" %}
+{% block title %}MP List{% endblock %}
+{% block body_attrs %}class="admin mp-admin-list"{% endblock %}
+{% block head %}
+  <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="/lib/jquery-tooltip/jquery.tooltip.min.js"></script>
+  <link type="text/css" href="/lib/jquery-tooltip/jquery.tooltip.css" rel="stylesheet">
+  <style type="text/css">
+    h1 { margin-bottom: 0; }
+    #group-summary table { margin: 0 auto; }
+    #group-summary table td { width: 50%; }
+    #group-summary table td.count { padding-left: 3em; }
+    #group-summary, #mp-list-form { width: 800px; }
+    #mp-list-form table { border-collapse: collapse; background: white; border: 6px solid white; clear: both; width: 100%; }
+    #mp-list-form table tr { line-height: 170%; }
+    #mp-list-form table tr.even-row { background: #EEE; }
+    #content a.positions { color: black; text-decoration: none; padding: 0 3px; }
+    #link-to-groups { float: right; margin: 0 2px 6px 0; }
+    #tooltip { opacity: 1; background: #FF9; border: 0; font-size: 13px; padding: 3px 6px; -moz-box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);; -webkit-box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25); }
+    #tooltip h3 { font: inherit; }
+  </style>
+  <script type="text/javascript">
+    $(function() {
+      $("#content a.positions").tooltip({
+        "showURL": false
+      });
+      
+      var count_by_group = {
+        {% for group in groups %}"{{ group.key }}": 0{% if not forloop.last %},{% endif %}{% endfor %}
+      };
+      $(".mp-group").each(function() {
+        count_by_group[$(this).val()]++;
+      });
+      
+      var update_counts = function() {
+        for (var group in count_by_group) {
+          $("#count-" + group).text(count_by_group[group]);
+        }
+      };
+      
+      update_counts();
+      
+      $("form select").change(function() {
+        var mp = $(this).attr("name");
+        var group = $(this).val();
+        var success = false;
+        
+        $.post("/mp/key/" + mp, {"group": group}, function(response) {
+          if (!response.ok) {
+            alert("Error: " + response.error);
+            success = false;
+            return;
+          }
+          success = true;
+          count_by_group[response.previous_group]--;
+          count_by_group[group]++;
+          update_counts();
+        });
+        
+        return success;
+      });
+      
+      $("#mp-list-form table tr:odd").addClass("even-row");
+    });
+  </script>
+{% endblock %}
+{% block header %}{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block inner %}
+  <h1>Members of Parliament</h1>
+    {% if error %}
+      <div class="error">{{ error|escape }}</div>
+    {% endif %}
+    <div id="group-summary">
+      <table>
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Number of MPs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in groups %}
+            <tr>
+              <td>{{ group.name|escape }}</td>
+              <td class="count" id="count-{{ group.key }}">calculating&hellip;</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form id="mp-list-form" method="POST">
+      <div id="link-to-groups"><a href="/mp/admin">Edit groups instead</a></div>
+      <table>
+        <thead>
+          <tr>
+            <th>MP</th>
+            <th>Constituency</th>
+            <th>Party</th>
+            <th>Group</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mp in mps %}
+            <tr>
+              <td>{{ mp.name|escape }}{% if mp.positions %}&nbsp;<a class="positions" href="#" onclick="return false" title="{% for p in mp.positions %}{{ p|escape }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">&#x272A;</a>
+              {% endif %}</td>
+              <td>{{ mp.constituency|escape }}</td>
+              <td>{{ mp.party|escape }}</td>
+              <td>
+                <select class="mp-group" name="{{ mp.key }}">
+                  {% for group in groups %}
+                    <option value="{{ group.key }}"
+                    {% ifequal group.key mp.group_key %}selected="selected"{% endifequal %}
+                    >{{ group.name|escape }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
+{% endblock %}

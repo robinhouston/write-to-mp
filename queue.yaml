@@ -1,0 +1,4 @@
+queue:
+- name: mp
+  rate: 10/s
+  bucket_size: 10

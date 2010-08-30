@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<title>{% block title %}{% endblock %}</title>
+		{% block meta_tags %}{% endblock %}
+		<link rel="stylesheet" href="/styles/common.css?a" type="text/css" media="screen" />
+		{% block additional_styles %}{% endblock %}
+		
+		<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+		<script type="text/javascript">google.load("jquery", "1.4.2");</script>
+		{% block head %}{% endblock %}
+	</head>
+	<body {% block body_attrs %}{% endblock %}>
+		{% block body %}{% endblock %}
+	</body>
+</html>

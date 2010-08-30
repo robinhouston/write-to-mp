@@ -1,0 +1,58 @@
+{% extends "../template.html" %}
+{% block title %}10:10 Lighter Later | Write to your MP{% endblock %}
+{% block body_attrs %}class="mp-enter"{% endblock %}
+{% block head %}
+  {% if change_postcode %}
+    <script type="text/javascript">
+      $(function() {
+        $("#mpform-postcode").select();
+      });
+    </script>
+  {% endif %}
+{% endblock %}
+{% block header %}
+<div id="header">
+  <h1><a href="/">10:10 Lighter Later</a></h1>
+    <img alt="" id="supporters" src="/styles/images/crowd3.jpg">
+</div>
+{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block inner %}
+  <div id="instructions">
+    <h2>Why email your MP?</h2>
+    
+    <p>Everybody loves the sunshine. But every year we set our clocks so that we get less of it in our lives, sleeping through the sunlit mornings while we use expensive, polluting electric light in the evenings. Lighter Later is a campaign to brighten all of our days, moving the clocks forward by one hour so that we are awake when the sun is out.</p>
+  
+  <p>This December a Lighter Later bill is going to Parliament and we need to make sure that enough MPs turn up and vote in favour. This tool will help you write a personalised letter to your own MP.</p>
+  
+  <p>Asking your MP to vote for the Private Member’s Bill is the most important thing you can do to make the Lighter Later plan a reality.</p>
+  
+  <p>Get started by entering your details to the right.</p>
+  </div>
+  <div id="mp-form">
+    <form method="GET" action="/mp/write">
+      {% if change_postcode %}
+        <div class="change-postcode">Enter the postcode where you’re registered to vote</div>
+      {% endif %}
+      {% if mp.error %}
+        <div class="error">Error: {{ mp.error|escape }}</div>
+      {% endif %}
+      <div>
+        <label for="mpform-name">Your name:</label>
+        <input type="text" class="mpform-field" id="mpform-name" name="name" value="{{ name|escape }}">
+      </div>
+      <div>
+        <label for="mpform-email">Your email:</label>
+        <input type="text" class="mpform-field" id="mpform-email" name="email" value="{{ email|escape }}">
+      </div>
+      <div>
+        <label for="mpform-postcode"{% if change_postcode %} class="highlighted"{% endif %}>Your postcode:</label>
+        <input type="text" class="mpform-field" id="mpform-postcode" name="postcode" value="{{ postcode|escape }}">
+      </div>
+      <div>
+        <input type="submit" class="mpform-submit" name="submit" value="Find my MP">
+      </div>
+    </form>
+  </div>
+  <div style="clear: both;"></div>
+{% endblock %}

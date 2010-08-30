@@ -1,0 +1,233 @@
+{% extends "../template.html" %}
+{% block title %}10:10 Lighter Later | MP Admin{% endblock %}
+{% block body_attrs %}class="admin mp-admin"{% endblock %}
+{% block head %}
+  <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="/lib/jquery-ui/js/jquery-ui-1.8.2.custom.min.js"></script>
+  <link type="text/css" href="/lib/jquery-ui/css/cupertino/jquery-ui-1.8.2.custom.css" rel="stylesheet">
+  <style type="text/css">
+    #number-of-mps-in-group { float: right; }
+    #group-menu-container { display: inline-block; position: relative; }
+    #group-menu-container .rename { font-size: 10px; color: white; clear: both; width: 100%; }
+    #group-menu-container .rename span { float: right; }
+    #mps-in-group { margin-bottom: 6px; /*background: #C0D9C4;*/ padding: 6px 6px 2px 6px; }
+    .mp { background: #FAFAE1; padding: 2px 2px; margin: 0 4px 4px 0; display: inline-block; }
+    .mp .ui-icon { display: inline-block; vertical-align: -20%; margin-left: 3px; cursor: pointer; }
+    #link-to-list { margin-top: 3em; }
+  </style>
+  <script type="text/javascript">
+    var blurb = {{ js_blurb }};
+    var mps_by_group = {{ js_mps_by_group }};
+    var all_mps = {{ js_all_mps }};
+    var default_group = "{{default_group}}";
+    var groups = {{js_groups}};
+    
+    var autocomplete_data = [];
+    for (mp_key in all_mps) {
+      var mp = all_mps[mp_key];
+      autocomplete_data.push({
+        "label": mp.name + " (" + mp.constituency + ", " + mp.party + ")",
+        "value": mp_key
+      });
+    }
+    
+    $(function() {
+      
+      var update_number_of_mps = function() {
+        if ($("#mp-group :selected").val() == default_group) {
+          $("#number-of-mps-in-group").text("");
+        }
+        else {
+          $("#number-of-mps-in-group").text("" + $("#mps-in-group .mp").length + " MPs in this group");
+        }
+      }
+      
+      // Add an MP to the list associated with the current group
+      var add_mp = function(mp_key) {
+        var mp = all_mps[mp_key];
+        var desc = mp.name + " (" + mp.constituency + ")";
+        $("#mps-in-group").append($("<span class='mp ui-corner-all'></span>").text(desc).append($("<span class='ui-icon ui-icon-circle-close'></span>").data("key", mp_key)));
+        update_number_of_mps()
+      };
+      
+      // Rename a group
+      $(".rename a").click(function() {
+        var selected_group = $("#mp-group :selected");
+        var new_name = prompt("Name of group:", selected_group.text());
+        if (new_name) {
+          if (selected_group.text() == new_name) {
+            // new name is the same as the old one
+            return false;
+          }
+          $.post("/mp/group/" + selected_group.val(), {"name": new_name}, function(response) {
+            if (! response.ok) {
+              alert("Error: " + response.error);
+              return;
+            }
+            selected_group.text(new_name);
+          }, "json");
+        }
+        return false;
+      });
+      
+      // When the group is changed using the dropdown
+      var selected_group = null;
+      $("#mp-group").change(function() {
+        if (selected_group &&
+            $("#blurb").val().replace(/\r/g, "") != (blurb[selected_group] || "").replace(/\r/g, ""))
+        {
+          if (!confirm("Are you sure you want to change group?\nYou will lose your unsaved changes.")) {
+            $("#mp-group").val(selected_group);
+            return false;
+          }
+        }
+        selected_group = $("#mp-group :selected").val();
+
+        if (selected_group == default_group) {
+          // If changing to the default group, disable the Delete button and don't show MPs
+          $("#delete-button").attr("disabled", "disabled");
+          $("#mps").hide();
+          $("#default-group").show();
+        }
+        else {
+          // Not the default group
+          $("#delete-button").removeAttr("disabled");
+          $("#mps").show();
+          $("#default-group").hide();
+          
+          $("#mps-in-group").empty()
+          var mps_in_group = mps_by_group[$("#mp-group").val()];
+          for (var i = 0; i < mps_in_group.length; i++) {
+            add_mp(mps_in_group[i]);
+          }
+        }
+        $("#blurb").text(blurb[selected_group] || "");
+        update_number_of_mps();
+      }).change();
+      
+      $("#delete-button").click(function() {
+        return confirm("Are you sure you want to delete this group?");
+      });
+      
+      // Assign an MP to a group
+      var set_group = function(mp, group, onsuccess, onerror) {
+        $.post("/mp/key/" + mp, {"group": group}, function(response) {
+          if (!response.ok) {
+            alert("Error: " + response.error);
+            if (onerror) onerror(response.error);
+            return;
+          }
+          
+          if (all_mps[mp]["group"] != group) {
+            if (all_mps[mp]["group"] != default_group) {
+              // This MP already belongs to a non-default group
+              var current_group = all_mps[mp]["group"];
+              if (group != default_group && !confirm(
+                "This MP is currently in " + groups[current_group] + ". Move to " + groups[group] + "?"
+              )) {
+                return;
+              }
+              // Remove from other group
+              var g = mps_by_group[current_group];
+              g.splice(g.indexOf(mp), 1);
+            }
+            all_mps[mp]["group"] = group;
+            mps_by_group[group].push(mp);
+            if (group == $("#mp-group :selected").val()) {
+              add_mp(mp);
+            }
+          }
+          if (onsuccess) onsuccess(response);
+        }, "json");
+      };
+      
+      $("#add-mp-to-group").submit(function() {
+        // This form is AJAX only. Cannot submit normally.
+        if ($("ul.ui-autocomplete li").length == 1) {
+          //alert("Got one!");
+          $("ul.ui-autocomplete li:eq(0) a").click();
+        }
+        return false;
+      });
+      
+      $("#add-mp-to-group #mp-name").autocomplete({
+        "source": autocomplete_data
+      })
+      .focus(function() {
+        if (!$(this).data("default")) {
+          $(this).data("default", $(this).val());
+        }
+        $(this).val("").css("color", "black");
+      })
+      .blur(function() {
+        $(this).val($(this).data("default")).css("color", "#666");
+      })
+      .css("color", "#666")
+      .bind("autocompletefocus", function(ev, ui) {
+        // Don't update the text field with the item value (which is the datastore key)
+        return false;
+      })
+      .bind("autocompleteselect", function(ev, ui) {
+        // Add an MP to the current group
+        var el = $(this);
+        var mp = ui.item.value;
+        set_group(mp, $("#mp-group :selected").val(), function() {
+          el.blur().focus();
+        });
+        return false;
+      });
+      
+      $(".mp .ui-icon").live("click", function() {
+        var el = $(this).closest(".mp");
+        set_group($(this).data("key"), default_group, function() {
+          el.remove();
+          update_number_of_mps();
+        });
+      });
+    });
+  </script>
+{% endblock %}
+{% block header %}{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block inner %}
+  <h1>Members of Parliament</h1>
+    {% if error %}
+      <div class="error">{{ error|escape }}</div>
+    {% endif %}
+    <form id="mp-group-form" method="POST" action="/mp/admin">
+      <div id="group-menu-container">
+        <label for="mp-group">Group: </label>
+        <select name="group" id="mp-group">
+          {% for mp_group in mp_groups %}
+            <option value="{{ mp_group.key }}"
+            {% ifequal group_to_select mp_group.key %}selected="selected"{% endifequal %}
+            >{{ mp_group.name|escape }}</option>
+          {% endfor %}
+        </select>
+        <div class="rename"><span>(<a href="#">rename</a>)</span></div>
+      </div>
+      <div id="new-group">
+        <input type="text" name="new-group-name">
+        <input type="submit" name="action" value="New group">
+      </div>
+      <div>
+      <div id="blurb-help">The informational text below is formatted using <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples" target="_blank">Markdown</a>.</div>
+      <textarea id="blurb" name="blurb"></textarea>
+      </div>
+      <input type="submit" name="action" value="Save changes">
+      <input id="delete-button" type="submit" name="action" value="Delete this group">
+      <div id="number-of-mps-in-group"></div>
+    </form>
+    <div id="mps">
+      <div id="mps-in-group" class="ui-corner-all"></div>
+      <div>
+        <form id="add-mp-to-group">
+          <input type="text" id="mp-name" name="mp-name" value="Type here to add an MP to the group">
+        </form>
+      </div>
+    </div>
+    <div id="default-group">
+      This is the default group, which includes all MPs not explicitly placed in a different group.
+    </div>
+    <div id="link-to-list"><a href="/mp/admin/list">Go to a list of all MPs instead</a></div>
+{% endblock %}

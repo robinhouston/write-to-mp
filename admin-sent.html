@@ -1,0 +1,27 @@
+{% extends "../template.html" %}
+{% block title %}10:10 Lighter Later | MP Letters sent{% endblock %}
+{% block body_attrs %}class="admin mp-admin-list"{% endblock %}
+{% block head %}
+  <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
+  <style type="text/css">
+    .row { margin-bottom: 12px; }
+    .name, .letter { display: inline-block; }
+    .name { width: 350px; vertical-align: top; }
+    .letter { overflow: auto; width: 500px; height: 100px; background: white; }
+  </style>
+{% endblock %}
+{% block header %}{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block inner %}
+  <h1>Letters sent to MPs</h1>
+  
+  {% for letter in letters %}
+    <div class="row" id="{{ letter.key|escape }}">
+      <span class="name">
+        {{ letter.name|escape }} &lt;{{ letter.writer_email|escape }}&gt;<br>
+        {{ letter.t_created|date:"r" }}
+      </span>
+      <span class="letter">{{ letter.body|escape|linebreaksbr }}</span>
+    </div>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "../template.html" %}
+{% block title %}10:10 Lighter Later | Email your MP{% endblock %}
+{% block body_attrs %}class="mp-write"{% endblock %}
+{% block head %}
+  <script type="text/javascript">
+    $(function() {
+      // Make links from the advice open in a separate window, so
+      // the user does not risk losing their partly-written letter.
+      $("#specific-advice a").attr("target", "_blank");
+
+      var form = $("#writetothem form");
+      form.submit(function() {
+        var div = $(".required").closest("div");
+        
+        var ok = true;
+        div.find("input").each(function() {
+          var value = $.trim($(this).val());
+          if (!value) {
+            ok = false;
+            div.addClass("error");
+          }
+          else {
+            div.removeClass("error");
+          }
+        });
+        if (ok) {
+          $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id|escape }}');
+        }
+        return ok;
+      });
+      
+      $("#advice li>ul").hide();
+      $("#advice h2").append('<span class="click-to-expand"><span>(click the notes to expand)</span></span>');
+      $("#specific-advice ol>li").css({"list-style": "none"}).each(function(i) {
+        $(this).children("p").prepend($('<span class="big-number"></span>').text("" + (i+1) ));
+        if ($(this).height() < 24) {
+          $(this).find(".big-number").addClass("oneline");
+        }
+      });
+      var expander_pars = $("#general-advice ul>li>p, #specific-advice ol>li>p");
+      expander_pars.addClass("active").addClass("closed").click(function() {
+        var already_open = $(this).hasClass("open");
+        expander_pars.removeClass("open").addClass("closed");
+        $("#advice li>ul").hide();
+        if (!already_open) {
+          $(this).addClass("open").removeClass("closed").parent().find("*").show();
+        }
+      });
+    });
+  </script>
+{% endblock %}
+{% block header %}
+<div id="header">
+  <h1><a href="/">10:10 Lighter Later</a></h1>
+  <h2>Email your MP</h2>
+</div>
+{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block inner %}
+  <div id="advice">
+      <h2>Before you start</h2>
+      <div id="general-advice">
+        <ul>
+          <li>
+            <p>Use your own words, keep it brief, and only write to your own MP.</p>
+            <ul>
+              <li>Please be polite, concise and to the point. A few paragraphs are much more likely to be read with interest than a few pages.</li>
+              <li><a target="_blank" href="http://www.writetothem.com/about-qa#formletters">Use your own words</a>: MPs who get lots of identical messages about a particular issue don’t see these as a genuine reflection of their constituents’ views. Don’t worry, we’ll give you lots of pointers about what to cover in your email.</li>
+              <li><a target="_blank" href="http://www.writetothem.com/about-qa#onlyrep">It’s a waste of time</a> writing to MPs other than your own; your message will go straight into the recycling bin.</li>
+              <li>You can find out more about <a target="_blank" href="http://www.theyworkforyou.com{{ mp.url|escape }}">your MP on TheyWorkForYou</a>.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div id="specific-advice"><div>
+        <h2>What to write</h2>
+        {{ advice }}
+      </div></div>
+      <div id="finally">
+        We use the <a href="http://www.writetothem.com/about-qa" target="_blank">WriteToThem</a> service to contact your MP.
+        When you press the preview button, a new window will open on the WriteToThem site.
+        <a href="http://www.mysociety.org" target="_blank"><img align="right" src="http://www.writetothem.com/images/mysociety-dark-50.png" style="margin-right: 9px;"></a>
+      </div>
+  </div>
+  <div id="writetothem">
+      <form action="http://www.writetothem.com/write" method="POST" target="_blank">
+          <input type="hidden" name="mysociety_serialized_variables" value="{{ mysociety_serialized_variables|escape }}">
+          <input type="hidden" name="name" value="{{ name|escape }}">
+          <input type="hidden" name="writer_email" value="{{ email|escape }}">
+          <input type="hidden" name="writer_email2" value="{{ email|escape }}">
+          
+          <div id="mp-details">
+            <img id="mp-photo" align="left" alt="" src="http://www.theyworkforyou.com{{ mp.image|escape }}" height="{{ mp.image_height|escape }}" width="{{ mp.image_width|escape }}">
+            {{ mp.full_name|escape }}<br>
+            MP for {{ mp.constituency }}<br>
+            {% if mp.office %}
+              {% for office in mp.office %}
+                <b>{{ office.position|escape }}{% if office.dept %}, {{ office.dept|escape}}{% endif %}</b><br>
+              {% endfor %}
+            {% endif %}
+            <span id="not-your-mp">(<a href="{{ not_your_mp_href|escape }}">Not your MP? Click here</a>)</span>
+          </div>
+          
+          <div id="address">
+              <textarea name="body">Dear {{ mp.full_name|escape }},&#xA;&#xA;&#xA;&#xA;Yours sincerely,&#xA;&#xA;{{ name|escape }}</textarea>
+              <div><label for="wttf-address1">Address:<span class="required">*</span></label><input class="textfield" id="wttf-address1" type="text" name="writer_address1" value=""><span class="error-message">&#xAB;&nbsp;required</span></div>
+              <div><label for="wttf-address2">&nbsp;</label><input class="textfield" id="wttf-address2" type="text" name="writer_address2" value=""></div>
+              <div><label for="wttf-town">Town/city:<span class="required">*</span></label><input class="textfield" id="wttf-town" type="text" name="writer_town" value=""><span class="error-message">&#xAB;&nbsp;required</span></div>
+              <div><label for="wttf-county">County:</label><input class="textfield" id="wttf-county" type="text" name="state" value=""></div>
+              <div><label for="postcode">Postcode:</label><span id="postcode">{{ postcode|escape }}</span></div>
+          </div>
+          <div id="phone"><label for="wttf-town">Phone:</label><input class="textfield" id="wttf-phone" type="text" name="writer_phone" value=""></div>
+          <div class="submit">When you’re ready: <input class="submit" name="submitPreview" value="Preview your Message" type="submit"></div>
+      </form>
+  </div>
+  <div style="clear: both;"></div>
+{% endblock %}

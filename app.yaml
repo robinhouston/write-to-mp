@@ -1,0 +1,28 @@
+application: write-to-mp
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+# Handlers for built-in app engine features
+- url: /_ah/queue/deferred
+  script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py
+  login: admin
+- url: /admin(/.*)?
+  script: $PYTHON_LIB/google/appengine/ext/admin
+  login: admin
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+# Handlers for the Write to MP functions
+# (Copy these to the app.yaml file in your application, if you are
+# integrating this code with an existing app engine application.)
+- url: /mp/(write|letter-sent)
+  script: mp/handlers.py
+- url: /(mp/images/.+)
+  static_files: \1
+  upload: mp/images/.+
+- url: /mp/.+
+  login: admin
+  script: mp/handlers.py
