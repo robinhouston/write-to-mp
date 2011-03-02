@@ -433,7 +433,7 @@ class TaskUpdateMP(webapp.RequestHandler):
     mp_key = db.Key.from_path("MP", "twfy_person_id=%d" % (twfy_person_id,))
     
     if mp_info["left_reason"] != "still_in_office":
-      logging.info("MP %s (%s) has left office: %s", mp_info["name"], mp_info["constituency"], mp_info["left_reason"])
+      logging.info("MP %s (%s) has left office: %s", mp_info["full_name"], mp_info["constituency"], mp_info["left_reason"])
       db.delete(mp_key)
       
     else:
