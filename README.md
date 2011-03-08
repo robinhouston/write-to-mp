@@ -44,7 +44,7 @@ the list of MPs as of 30 August 2010.
 ### Get the real thing working
 
 1. Create a Google App Engine application [here](https://appengine.google.com/).
-2. Edit the file `app.yaml` and insert the name of your application on the first line, in place of
+2. Edit the file `app.yaml` and on the first line insert the application identifier you just chose, in place of
    `write-to-mp`.
 3. Click the Publish button in the Google App Engine Launcher.
 4. Check you can see the page you looked at on your computer by going to
