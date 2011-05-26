@@ -193,10 +193,10 @@ class LetterSentHandler(webapp.RequestHandler):
     # eta = datetime.datetime(two_weeks_time.year, two_weeks_time.month, two_weeks_time.day, 9, 30)
     # taskqueue.Queue("write-to-mp").add(taskqueue.Task(
     #   eta=eta, url="/mp/task/two-weeks-later",
-    #   payload=urllib.urlencode({
+    #   params={
     #     "email": self.request.get("writer_email"),
     #     "name": self.request.get("name"),
-    #   }),
+    #   },
     # ))
 
 class AdminHandler(webapp.RequestHandler):
