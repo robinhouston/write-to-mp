@@ -1,0 +1,51 @@
+{% extends "template.html" %}
+{% block title %}MP List{% endblock %}
+{% block body_attrs %}class="admin mp-admin-list"{% endblock %}
+{% block head %}
+  <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
+  <style type="text/css">
+    body { margin-bottom: 50px; }
+    #twfy_api_key, #favicon_url { width: 400px; margin-top: 1em; }
+    #intro_markdown { width: 800px; height: 400px; }
+    #save_div {margin-top: 2em;}
+    #save {display: block; margin-top: 1em;}
+  </style>
+  <script type="text/javascript">
+    $(function() {
+      $("form").submit(function() {return false;});
+      $("#twfy_api_key").keyup(function() {
+        $.post("/mp/settings", {"twfy_api_key": $(this).val()});
+        return true;
+      });
+      $("#intro_markdown").keyup(function() {
+        $.post("/mp/settings", {"intro_markdown": $(this).val()});
+        return true;
+      });
+      $("#favicon_url").keyup(function() {
+        $.post("/mp/settings", {"favicon_url": $(this).val()});
+        return true;
+      });
+    });
+  </script>
+{% endblock %}
+{% block body %}
+  <h1>Settings</h1>
+  <form id="settings">
+    <h2>TheyWorkForYou API key</h2>
+    <p>You need to get an API key from <a href="http://www.theyworkforyou.com/api/key" target="twfy">TheyWorkForYou</a>, and paste it below.<br>
+    <input id="twfy_api_key" type="text" name="twfy_api_key" value="{{ settings.twfy_api_key }}">
+    
+    <h2>Introductory text</h2>
+    <textarea id="intro_markdown">{{ settings.intro_markdown }}</textarea>
+    
+    <h2>Favicon URL</h2>
+    <p>The URL of your favicon, if you have one.<br>
+    <input id="favicon_url" type="text" name="favicon_url" value="{{ settings.favicon_url }}">
+    
+    <div id="save_div">
+      All changes are auto-saved, so this button does not do anything.<br>
+      You can press it if that makes you happy.
+      <input id="save" type="submit" name="save" value="Save changes">
+    </div>
+  </form>
+{% endblock %}

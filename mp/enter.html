@@ -14,10 +14,11 @@
   <div id="instructions">
     <h2>Why email your MP?</h2>
     
-    <!-- v v Replace everything from this comment to the following one. v v -->
-    <p class="red">Edit the file <code>mp/enter.html</code> and put in an explanation of why you want people
-      to write to their MP.</p>
-    <!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ -->
+    {% if intro_text %}
+      {{ intro_text|safe }}
+    {% else %}
+      <p class="red">Go to the <a href="/mp/admin/settings">settings page</a> and put in some introductory text.</p>
+    {% endif %}
   
   <p>Get started by entering your details to the right.</p>
   </div>

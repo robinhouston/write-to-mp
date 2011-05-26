@@ -20,9 +20,20 @@ import markdown
 md = markdown.Markdown()
 
 
-# Constants
+# Settings
 
-TWFY_API_KEY = "REPLACE_THIS_WITH_YOUR_API_KEY"
+class Settings(db.Model):
+  twfy_api_key = db.StringProperty(default="UNSET")
+  favicon_url = db.TextProperty(default="")
+  intro_markdown = db.TextProperty(default="")
+
+def settings():
+  return Settings.get_by_key_name("settings") or Settings(key_name="settings")
+
+def twfy_api_key():
+  return settings().twfy_api_key
+def favicon_url():
+  return settings().favicon_url
 
 # Data
 
@@ -93,9 +104,12 @@ class PageHandler(webapp.RequestHandler):
       
         blurb = group.blurb
         advice = md.convert(blurb) if blurb else ""
+        intro_text_html = None
     else:
       template_path = "enter.html"
       mp, advice, mysociety_serialized_variables = None, None, None
+      intro_text_md = settings().intro_markdown
+      intro_text_html = md.convert(intro_text_md) if intro_text_md else None
     
     template_vars = {
       "mp_json": mp_json,
@@ -104,6 +118,7 @@ class PageHandler(webapp.RequestHandler):
       "advice": advice,
       "not_your_mp_href": self.request.url + "&change-postcode=1",
       "change_postcode": bool(self.request.get("change-postcode")),
+      "intro_text": intro_text_html
     }
     template_vars.update(self.request.params)
     self.response.out.write(webapp.template.render(template_path, template_vars))
@@ -113,7 +128,7 @@ class PageHandler(webapp.RequestHandler):
     if not postcode:
       return None
     url = "http://www.theyworkforyou.com/api/getMP?"+ urllib.urlencode({
-      "key": TWFY_API_KEY,
+      "key": twfy_api_key(),
       "output": "js",
       "postcode": postcode
     })
@@ -338,11 +353,28 @@ class GroupRestHandler(webapp.RequestHandler):
     group.name = name
     group.put()
 
+class SettingsRestHandler(webapp.RequestHandler):
+  def post(self):
+    s = settings()
+    if "twfy_api_key" in self.request.params:
+      s.twfy_api_key = self.request.get("twfy_api_key")
+    if "intro_markdown" in self.request.params:
+      s.intro_markdown = self.request.get("intro_markdown")
+    if "favicon_url" in self.request.params:
+      s.favicon_url = self.request.get("favicon_url")
+    s.put()
+
 class AdminListHandler(webapp.RequestHandler):
   def get(self):
     self.response.out.write(webapp.template.render("admin-list.html", {
       "mps": MP.all().order("name").fetch(1000),
       "groups": MPGroup.all().order("__key__").fetch(1000),
+    }))
+
+class AdminSettingsHandler(webapp.RequestHandler):
+  def get(self):
+    self.response.out.write(webapp.template.render("admin-settings.html", {
+      "settings": settings(),
     }))
 
 class CronNewMPs(webapp.RequestHandler):
@@ -352,7 +384,7 @@ class CronNewMPs(webapp.RequestHandler):
     db.run_in_transaction(self._ensure_default_mp_group)
     
     url = "http://www.theyworkforyou.com/api/getMPs?"+ urllib.urlencode({
-      "key": TWFY_API_KEY,
+      "key": twfy_api_key(),
     })
     result = urlfetch.fetch(url, None, urlfetch.GET)
     if result.status_code != 200:
@@ -421,7 +453,7 @@ class TaskUpdateMP(webapp.RequestHandler):
     twfy_person_id = int(twfy_person_id_str)
     
     url = "http://www.theyworkforyou.com/api/getMP?"+ urllib.urlencode({
-      "key": TWFY_API_KEY,
+      "key": twfy_api_key(),
       "output": "js",
       "id": str(twfy_person_id),
     })
@@ -489,6 +521,13 @@ class AdminSentHandler(webapp.RequestHandler):
       "letters": MPLetter.all().order("t_created"),
     }))
 
+class FaviconHandler(webapp.RequestHandler):
+  def get(self):
+    url = favicon_url()
+    if url:
+      self.redirect(url)
+    else:
+      self.error(404)
 
 def main():
   handlers = [
@@ -497,13 +536,17 @@ def main():
     
     (r'/mp/admin', AdminHandler),
     (r'/mp/admin/list', AdminListHandler),
+    (r'/mp/admin/settings', AdminSettingsHandler),
     (r'/mp/key/(.+)', RestHandler),
     (r'/mp/group/(.+)', GroupRestHandler),
+    (r'/mp/settings', SettingsRestHandler),
     (r'/mp/admin/sent', AdminSentHandler),
     
     (r'/mp/cron/new_mps', CronNewMPs),
     (r'/mp/cron/update_mps', CronUpdateMPs),
     (r'/mp/cron/task/update_mp/(\d+)', TaskUpdateMP),
+    
+    (r'/favicon\.ico', FaviconHandler),
     
 #    (r'/mp/task/two-weeks-later', TaskTwoWeeksLater),
   ]

@@ -36,3 +36,7 @@ handlers:
 - url: /lib/(.+)
   static_files: jslib/\1
   upload: jslib/.+
+
+# Favicon
+- url: /favicon.ico
+  script: mp/handlers.py
