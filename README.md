@@ -30,11 +30,12 @@ The rest of these instructions assume you want to install it as a separate appli
 
 ### See if it works on your computer
 
-1. Download the [Google App Engine SDK for Python](http://code.google.com/appengine/downloads.html#Google_App_Engine_SDK_for_Python) and install it on your computer.
-2. Run the Google App Engine Launcher.
-3. Choose "Add existing application", and select the directory containing this application.
-4. Click the Run button.
-5. Go to http://localhost:8080/mp/write in your web browser, and make sure a page appears.
+1. If you're using Windows, install [Python 2.5](http://www.python.org/ftp/python/2.5.4/python-2.5.4.msi). (If you're using a Mac or Linux, it is probably installed already, so you can skip this step.)
+2. Download the [Google App Engine SDK for Python](http://code.google.com/appengine/downloads.html#Google_App_Engine_SDK_for_Python) and install it on your computer.
+3. Run the Google App Engine Launcher.
+4. Choose "Add existing application", and select the directory containing this application.
+5. Click the Run button.
+6. Go to http://localhost:8080/mp/write in your web browser, and make sure a page appears.
 
 **For advanced users**: There is a test data set distributed with this code, in the file
 `data/test-data.sqlite`. You can tell the dev appserver to use this data file by passing
@@ -44,9 +45,9 @@ the list of MPs as of 30 August 2010.
 ### Get the real thing working
 
 1. Create a Google App Engine application [here](https://appengine.google.com/).
-2. Edit the file `app.yaml` and on the first line insert the application identifier you just chose, in place of
-   `write-to-mp`.
-3. Click the Publish button in the Google App Engine Launcher.
+2. Edit the file `app.yaml` and on the first line insert the application identifier you just chose, 
+   in place of `write-to-mp`.
+3. Click the Deploy button in the Google App Engine Launcher.
 4. Check you can see the page you looked at on your computer by going to
    http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application,
    which you chose in step 1.
@@ -67,8 +68,11 @@ the list of MPs as of 30 August 2010.
 
 ### Setting up the advice
 
+This is the advice that users see next to the letter-writing form, after entering their
+name, email address and postcode.
+
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
-advice. If you want your advice to be shown as collapsible sections that can be expanded by
+text. If you want your advice to be shown as collapsible sections that can be expanded by
 clicking, you have to format it in a specific way, like this:
     1. First collapsible section
     
@@ -90,6 +94,14 @@ and
     <!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ -->
 and replace it with the text you want, in HTML format. (You can just wrap each paragraph
 in a pair &lt;p&gt; &hellip; &lt;/p&gt;.)
+
+You can test the change on your computer before deploying it, by going to
+http://localhost:8080/mp/enter in your web browser. If the page is blank or
+you see an error message, that probably means the template has been messed
+up somehow. If you can't work out how to fix it, you can download the original
+version of the enter.html file [here](https://github.com/robinhouston/write-to-mp/raw/master/mp/enter.html)
+(right-click on that link and choose to download it), and copy it over the
+messed-up one.
 
 ### Grouping MPs
 
