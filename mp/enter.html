@@ -28,19 +28,19 @@
         <div class="change-postcode">Enter the postcode where you’re registered to vote</div>
       {% endif %}
       {% if mp.error %}
-        <div class="error">Error: {{ mp.error|escape }}</div>
+        <div class="error">Error: {{ mp.error }}</div>
       {% endif %}
       <div>
         <label for="mpform-name">Your name:</label>
-        <input type="text" class="mpform-field" id="mpform-name" name="name" value="{{ name|escape }}">
+        <input type="text" class="mpform-field" id="mpform-name" name="name" value="{{ name }}">
       </div>
       <div>
         <label for="mpform-email">Your email:</label>
-        <input type="text" class="mpform-field" id="mpform-email" name="email" value="{{ email|escape }}">
+        <input type="text" class="mpform-field" id="mpform-email" name="email" value="{{ email }}">
       </div>
       <div>
         <label for="mpform-postcode"{% if change_postcode %} class="highlighted"{% endif %}>Your postcode:</label>
-        <input type="text" class="mpform-field" id="mpform-postcode" name="postcode" value="{{ postcode|escape }}">
+        <input type="text" class="mpform-field" id="mpform-postcode" name="postcode" value="{{ postcode }}">
       </div>
       <div>
         <input type="submit" class="mpform-submit" name="submit" value="Find my MP">

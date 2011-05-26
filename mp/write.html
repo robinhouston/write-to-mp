@@ -24,7 +24,7 @@
           }
         });
         if (ok) {
-          $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id|escape }}');
+          $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id }}');
         }
         return ok;
       });
@@ -60,7 +60,7 @@
               <li>Please be polite, concise and to the point. A few paragraphs are much more likely to be read with interest than a few pages.</li>
               <li><a target="_blank" href="http://www.writetothem.com/about-qa#formletters">Use your own words</a>: MPs who get lots of identical messages about a particular issue don’t see these as a genuine reflection of their constituents’ views. Don’t worry, we’ll give you lots of pointers about what to cover in your email.</li>
               <li><a target="_blank" href="http://www.writetothem.com/about-qa#onlyrep">It’s a waste of time</a> writing to MPs other than your own; your message will go straight into the recycling bin.</li>
-              <li>You can find out more about <a target="_blank" href="http://www.theyworkforyou.com{{ mp.url|escape }}">your MP on TheyWorkForYou</a>.</li>
+              <li>You can find out more about <a target="_blank" href="http://www.theyworkforyou.com{{ mp.url }}">your MP on TheyWorkForYou</a>.</li>
             </ul>
           </li>
         </ul>
@@ -77,30 +77,30 @@
   </div>
   <div id="writetothem">
       <form action="http://www.writetothem.com/write" method="POST" target="_blank">
-          <input type="hidden" name="mysociety_serialized_variables" value="{{ mysociety_serialized_variables|escape }}">
-          <input type="hidden" name="name" value="{{ name|escape }}">
-          <input type="hidden" name="writer_email" value="{{ email|escape }}">
-          <input type="hidden" name="writer_email2" value="{{ email|escape }}">
+          <input type="hidden" name="mysociety_serialized_variables" value="{{ mysociety_serialized_variables }}">
+          <input type="hidden" name="name" value="{{ name }}">
+          <input type="hidden" name="writer_email" value="{{ email }}">
+          <input type="hidden" name="writer_email2" value="{{ email }}">
           
           <div id="mp-details">
-            <img id="mp-photo" align="left" alt="" src="http://www.theyworkforyou.com{{ mp.image|escape }}" height="{{ mp.image_height|escape }}" width="{{ mp.image_width|escape }}">
-            {{ mp.full_name|escape }}<br>
+            <img id="mp-photo" align="left" alt="" src="http://www.theyworkforyou.com{{ mp.image }}" height="{{ mp.image_height }}" width="{{ mp.image_width }}">
+            {{ mp.full_name }}<br>
             MP for {{ mp.constituency }}<br>
             {% if mp.office %}
               {% for office in mp.office %}
-                <b>{{ office.position|escape }}{% if office.dept %}, {{ office.dept|escape}}{% endif %}</b><br>
+                <b>{{ office.position }}{% if office.dept %}, {{ office.dept}}{% endif %}</b><br>
               {% endfor %}
             {% endif %}
-            <span id="not-your-mp">(<a href="{{ not_your_mp_href|escape }}">Not your MP? Click here</a>)</span>
+            <span id="not-your-mp">(<a href="{{ not_your_mp_href }}">Not your MP? Click here</a>)</span>
           </div>
           
           <div id="address">
-              <textarea name="body">Dear {{ mp.full_name|escape }},&#xA;&#xA;&#xA;&#xA;Yours sincerely,&#xA;&#xA;{{ name|escape }}</textarea>
+              <textarea name="body">Dear {{ mp.full_name }},&#xA;&#xA;&#xA;&#xA;Yours sincerely,&#xA;&#xA;{{ name }}</textarea>
               <div><label for="wttf-address1">Address:<span class="required">*</span></label><input class="textfield" id="wttf-address1" type="text" name="writer_address1" value=""><span class="error-message">&#xAB;&nbsp;required</span></div>
               <div><label for="wttf-address2">&nbsp;</label><input class="textfield" id="wttf-address2" type="text" name="writer_address2" value=""></div>
               <div><label for="wttf-town">Town/city:<span class="required">*</span></label><input class="textfield" id="wttf-town" type="text" name="writer_town" value=""><span class="error-message">&#xAB;&nbsp;required</span></div>
               <div><label for="wttf-county">County:</label><input class="textfield" id="wttf-county" type="text" name="state" value=""></div>
-              <div><label for="postcode">Postcode:</label><span id="postcode">{{ postcode|escape }}</span></div>
+              <div><label for="postcode">Postcode:</label><span id="postcode">{{ postcode }}</span></div>
           </div>
           <div id="phone"><label for="wttf-town">Phone:</label><input class="textfield" id="wttf-phone" type="text" name="writer_phone" value=""></div>
           <div class="submit">When you’re ready: <input class="submit" name="submitPreview" value="Preview your Message" type="submit"></div>

@@ -16,12 +16,12 @@
   <h1>Letters sent to MPs</h1>
   
   {% for letter in letters %}
-    <div class="row" id="{{ letter.key|escape }}">
+    <div class="row" id="{{ letter.key }}">
       <span class="name">
-        {{ letter.name|escape }} &lt;{{ letter.writer_email|escape }}&gt;<br>
+        {{ letter.name }} &lt;{{ letter.writer_email }}&gt;<br>
         {{ letter.t_created|date:"r" }}
       </span>
-      <span class="letter">{{ letter.body|escape|linebreaksbr }}</span>
+      <span class="letter">{{ letter.body|linebreaksbr }}</span>
     </div>
   {% endfor %}
 {% endblock %}
