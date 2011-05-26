@@ -32,7 +32,8 @@
   <h1>Settings</h1>
   <form id="settings">
     <h2>TheyWorkForYou API key</h2>
-    <p>You need to get an API key from <a href="http://www.theyworkforyou.com/api/key" target="twfy">TheyWorkForYou</a>, and paste it below.<br>
+    {% if settings.twfy_api_key == "UNSET" %}
+      <p>You need to get an API key from <a href="http://www.theyworkforyou.com/api/key" target="twfy">TheyWorkForYou</a>, and paste it below.<br>{% endif %}
     <input id="twfy_api_key" type="text" name="twfy_api_key" value="{{ settings.twfy_api_key }}">
     
     <h2>Introductory text</h2>
