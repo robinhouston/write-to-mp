@@ -25,8 +25,7 @@ The rest of these instructions assume you want to install it as a separate appli
 1. You need a Google account. If you have a GMail address, that will do. If not, you can make a Google account
    by filling in [this form](https://www.google.com/accounts/NewAccount).
 2. Download this application from <https://github.com/robinhouston/write-to-mp/zipball/master> and unzip it – or check out the git repository, if you know how to do that.
-3. Register for a [TheyWorkForYou API key](http://www.theyworkforyou.com/api/key).
-4. Edit the file `handlers.py` and insert your API key where indicated, on line 25 of the file.
+3. Register for a [TheyWorkForYou API key](http://www.theyworkforyou.com/api/key), and keep a note of it.
 
 ### See if it works on your computer
 
@@ -48,14 +47,17 @@ the list of MPs as of 30 August 2010.
 2. Edit the file `app.yaml` and on the first line insert the application identifier you just chose, 
    in place of `write-to-mp`.
 3. Click the Deploy button in the Google App Engine Launcher.
-4. Check you can see the page you looked at on your computer by going to
+4. Go to the settings page at http://your-app-id.appspot.com/mp/admin/settings, and put in your
+   TheyWorkForYouAPI key (obtained in Basic Setup above). This is also the page where you will
+   edit the introductory text for your campaign.
+5. Check you can see the page you looked at on your computer by going to
    http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application,
    which you chose in step 1.
-5. Tell the application to download the list of MPs from TheyWorkForYou by going to
+6. Tell the application to download the list of MPs from TheyWorkForYou by going to
    http://your-app-id.appspot.com/mp/cron/new_mps
    You will have to log in using your Google account at this point. If this step works
    correctly, you will see the message "Fetching new MPs in the background".
-6. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list
+7. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list
    and reloading it periodically to check that the list is updating.
 
 ### Associate it with the domain name you want to use
@@ -86,14 +88,8 @@ clicking, you have to format it in a specific way, like this:
 Note that the placement of blank lines and the precise number of spaces before
 a star is crucial. You may have to use some trial-and-error to get it right!
 
-You should also edit the file `mp/enter.html` and change the introductory text to explain
-your campaign. Delete everything between the markers
-
-    <!-- v v Replace everything from this comment to the following one. v v -->
-and
-    <!-- ^ ^ Replace everything up to this comment from the previous one. ^ ^ -->
-and replace it with the text you want, in HTML format. (You can just wrap each paragraph
-in a pair &lt;p&gt; &hellip; &lt;/p&gt;.)
+You should also edit the introductory text to explain your campaign, on
+the settings page at http://your-app-id.appspot.com/mp/admin/settings.
 
 You can test the change on your computer before deploying it, by going to
 http://localhost:8080/mp/enter in your web browser. If the page is blank or
