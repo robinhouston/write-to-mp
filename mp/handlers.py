@@ -90,7 +90,7 @@ class PageHandler(webapp.RequestHandler):
       mp = json.loads(mp_json)
       if "error" in mp:
         template_path = "enter.html"
-        advice, mysociety_serialized_variables = None, None
+        advice, mysociety_serialized_variables, intro_text_html = None, None, None
       else:
         template_path = "write.html"
         mysociety_serialized_variables = self.get_mysociety_serialized_variables(self.request.get("postcode"))
