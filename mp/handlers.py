@@ -9,6 +9,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'django_settings'
 from google.appengine.dist import use_library
 use_library('django', '1.2')
 
+from django.utils import safestring
 from django.utils import simplejson as json
 from google.appengine.api import mail
 from google.appengine.api import urlfetch
@@ -74,6 +75,14 @@ class MP(db.Model):
   def group_key(self):
     return self.__class__.group.get_value_for_datastore(self)
 
+# Utility functions
+
+def json_dumps(data):
+    return safestring.mark_safe(json.dumps(data))
+
+def md_convert(markdown_text):
+    return safestring.mark_safe(md.convert(markdown_text))
+
 # Request handlers
 
 class PageHandler(webapp.RequestHandler):
@@ -107,13 +116,13 @@ class PageHandler(webapp.RequestHandler):
           group = mp_entities[0].group
       
         blurb = group.blurb
-        advice = md.convert(blurb) if blurb else ""
+        advice = md_convert(blurb) if blurb else ""
         intro_text_html = None
     else:
       template_path = "enter.html"
       mp, advice, mysociety_serialized_variables = None, None, None
       intro_text_md = settings().intro_markdown
-      intro_text_html = md.convert(intro_text_md) if intro_text_md else None
+      intro_text_html = md_convert(intro_text_md) if intro_text_md else None
     
     template_vars = {
       "mp_json": mp_json,
@@ -222,7 +231,7 @@ class AdminHandler(webapp.RequestHandler):
       "group_to_select": self.__group,
       "js_blurb": self.js_blurb(mp_groups),
       "mp_groups": mp_groups,
-      "js_groups": json.dumps(dict( (str(g.key()), g.name) for g in mp_groups)),
+      "js_groups": json_dumps(dict( (str(g.key()), g.name) for g in mp_groups)),
       "js_mps_by_group": js_mps_by_group,
       "js_all_mps": js_all_mps,
       "default_group": db.Key.from_path("MPGroup", "Default"),
@@ -231,7 +240,7 @@ class AdminHandler(webapp.RequestHandler):
     self.response.out.write(webapp.template.render("admin.html", template_vars))
   
   def js_blurb(self, mp_groups):
-    return json.dumps(dict(
+    return json_dumps(dict(
       (str(mp_group.key()), mp_group.blurb) for mp_group in mp_groups
     ))
   
@@ -251,7 +260,7 @@ class AdminHandler(webapp.RequestHandler):
       if group_key.name() == "Default" or str(group_key) not in mps_by_group:
         continue
       mps_by_group[str(group_key)].append(str(mp.key()))
-    return json.dumps(mps_by_group), json.dumps(all_mps)
+    return json_dumps(mps_by_group), json_dumps(all_mps)
   
   def post(self):
     action = self.request.get("action").lower()
@@ -315,7 +324,7 @@ class RestHandler(webapp.RequestHandler):
       response = { "ok": False, "error": e.args[0] }
     
     self.response.headers["Content-type"] = "application/json"
-    self.response.out.write(json.dumps(response))
+    self.response.out.write(json_dumps(response))
   
   def add_to_group(self, mp_key, group_key):
     if not MPGroup.get(group_key):
@@ -342,7 +351,7 @@ class GroupRestHandler(webapp.RequestHandler):
       response = { "ok": False, "error": e.args[0] }
     
     self.response.headers["Content-type"] = "application/json"
-    self.response.out.write(json.dumps(response))
+    self.response.out.write(json_dumps(response))
   
   def set_group_name(self, group_key, name):
     # Yeah, this is a race condition - but the worst that can happen is

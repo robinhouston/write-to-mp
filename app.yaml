@@ -1,4 +1,4 @@
-application: write-to-mp
+application: 1010-action
 version: 1
 runtime: python
 api_version: 1
