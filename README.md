@@ -39,7 +39,7 @@ The rest of these instructions assume you want to install it as a separate appli
 **For advanced users**: There is a test data set distributed with this code, in the file
 `data/test-data.sqlite`. You can tell the dev appserver to use this data file by passing
 the command-line options `--use_sqlite --datastore_path=data/test-data.sqlite`. This contains
-the list of MPs as of 30 August 2010.
+the list of MPs as of 14 February 2012.
 
 ### Get the real thing working
 
