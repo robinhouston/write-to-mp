@@ -7,12 +7,10 @@
     .row { margin-bottom: 12px; }
     .name, .letter { display: inline-block; }
     .name { width: 350px; vertical-align: top; }
-    .letter { overflow: auto; width: 500px; height: 100px; background: white; }
+    .letter { overflow: auto; width: 500px; height: 200px; background: white; margin: 1px solid gray; }
   </style>
 {% endblock %}
-{% block header %}{% endblock %}
-{% block sidebar %}{% endblock %}
-{% block inner %}
+{% block body %}
   <h1>Letters sent to MPs</h1>
   
   {% for letter in letters %}
