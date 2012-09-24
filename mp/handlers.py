@@ -470,7 +470,7 @@ class TaskUpdateMP(webapp.RequestHandler):
       "output": "js",
       "id": str(twfy_person_id),
     })
-    result = urlfetch.fetch(url, None, urlfetch.GET)
+    result = urlfetch.fetch(url, None, urlfetch.GET, deadline=60)
     if result.status_code != 200:
       raise Exception("MP lookup failed for person_id %d", twfy_person_id)
 
