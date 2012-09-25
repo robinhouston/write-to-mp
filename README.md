@@ -121,7 +121,7 @@ Developed for the [10:10 Lighter Later](http://www.lighterlater.org/) campaign.
 
 ### Author
 
-Written by Robin Houston <robin+ghmp@1010uk.org>.
+Written by Robin Houston <robin.houston@gmail.com>
 
 ### Copyright
 This code is copyright [10:10](http://www.1010uk.org/), 2010, and is made available under the terms of the GNU GPL v2.
