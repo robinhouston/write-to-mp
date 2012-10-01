@@ -26,7 +26,7 @@
       });
       
       var count_by_group = {
-        {% for group in groups %}"{{ group.key }}": 0{% if not forloop.last %},{% endif %}{% endfor %}
+        {% for group in groups %}"{{ group.key() }}": 0{% if not loop.last %},{% endif %}{% endfor %}
       };
       $(".mp-group").each(function() {
         count_by_group[$(this).val()]++;
@@ -81,7 +81,7 @@
           {% for group in groups %}
             <tr>
               <td>{{ group.name }}</td>
-              <td class="count" id="count-{{ group.key }}">calculating&hellip;</td>
+              <td class="count" id="count-{{ group.key() }}">calculating&hellip;</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -101,15 +101,15 @@
         <tbody>
           {% for mp in mps %}
             <tr>
-              <td>{{ mp.name }}{% if mp.positions %}&nbsp;<a class="positions" href="#" onclick="return false" title="{% for p in mp.positions %}{{ p }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">&#x272A;</a>
+              <td>{{ mp.name }}{% if mp.positions %}&nbsp;<a class="positions" href="#" onclick="return false" title="{% for p in mp.positions %}{{ p }}{% if not loop.last %}<br>{% endif %}{% endfor %}">&#x272A;</a>
               {% endif %}</td>
               <td>{{ mp.constituency }}</td>
               <td>{{ mp.party }}</td>
               <td>
-                <select class="mp-group" name="{{ mp.key }}">
+                <select class="mp-group" name="{{ mp.key() }}">
                   {% for group in groups %}
-                    <option value="{{ group.key }}"
-                    {% ifequal group.key mp.group_key %}selected="selected"{% endifequal %}
+                    <option value="{{ group.key() }}"
+                    {% if group.key() == mp.group_key() %}selected="selected"{% endif %}
                     >{{ group.name }}</option>
                   {% endfor %}
                 </select>

@@ -197,8 +197,8 @@
         <label for="mp-group">Group: </label>
         <select name="group" id="mp-group">
           {% for mp_group in mp_groups %}
-            <option value="{{ mp_group.key }}"
-            {% ifequal group_to_select mp_group.key %}selected="selected"{% endifequal %}
+            <option value="{{ mp_group.key() }}"
+            {% if group_to_select == mp_group.key() %}selected="selected"{% endif %}
             >{{ mp_group.name }}</option>
           {% endfor %}
         </select>

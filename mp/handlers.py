@@ -1,25 +1,31 @@
 import datetime
+import json
 import logging
 import os
 import re
 import sys
 import urllib
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'django_settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
+import jinja2
+import webapp2
 
-from django.utils import safestring
-from django.utils import simplejson as json
 from google.appengine.api import mail
 from google.appengine.api import urlfetch
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 from google.appengine.ext import db
-from google.appengine.ext import webapp
-import google.appengine.ext.webapp.util
-from google.appengine.ext.webapp import template
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "pylib"))
+APP_DIR = os.path.dirname(__file__)
+
+# Configure Jinja2
+jin = jinja2.Environment(
+  loader=jinja2.FileSystemLoader(APP_DIR),
+  extensions=['jinja2.ext.autoescape'],
+  autoescape = lambda t: (t is None or re.match(r".*\.(html|htm|xml)$", t) is not None),
+)
+jin.filters["linebreaksbr"] = lambda s: re.sub(r"\r?\n", jinja2.Markup("<br>"), jinja2.Markup.escape(s))
+
+# Load and configure Markdown
+sys.path.append(os.path.join(APP_DIR, os.path.pardir, "pylib"))
 import markdown
 
 md = markdown.Markdown()
@@ -78,14 +84,14 @@ class MP(db.Model):
 # Utility functions
 
 def json_dumps(data):
-    return safestring.mark_safe(json.dumps(data))
+    return jinja2.Markup(json.dumps(data))
 
 def md_convert(markdown_text):
-    return safestring.mark_safe(md.convert(markdown_text))
+    return jinja2.Markup(md.convert(markdown_text))
 
 # Request handlers
 
-class PageHandler(webapp.RequestHandler):
+class PageHandler(webapp2.RequestHandler):
   def get(self):
     if self.request.get("change-postcode"):
       mp_json = None
@@ -134,7 +140,7 @@ class PageHandler(webapp.RequestHandler):
       "intro_text": intro_text_html
     }
     template_vars.update(self.request.params)
-    self.response.out.write(webapp.template.render(template_path, template_vars))
+    self.response.out.write(jin.get_template(template_path).render(template_vars))
   
   def get_mp_json(self):
     postcode = self.request.get("postcode")
@@ -174,7 +180,7 @@ class PageHandler(webapp.RequestHandler):
       raise Exception("Could not find mysociety_serialized_variables in %s" % (new_location))
     return mo.group(1)
 
-class LetterSentHandler(webapp.RequestHandler):
+class LetterSentHandler(webapp2.RequestHandler):
   def post(self):
     p = {}
     for k, v in self.request.params.iteritems():
@@ -212,7 +218,7 @@ class LetterSentHandler(webapp.RequestHandler):
     #   },
     # ))
 
-class AdminHandler(webapp.RequestHandler):
+class AdminHandler(webapp2.RequestHandler):
   __error = None
   __group = None
   
@@ -237,7 +243,7 @@ class AdminHandler(webapp.RequestHandler):
       "default_group": db.Key.from_path("MPGroup", "Default"),
       "error": self.__error,
     }
-    self.response.out.write(webapp.template.render("admin.html", template_vars))
+    self.response.out.write(jin.get_template("admin.html").render(template_vars))
   
   def js_blurb(self, mp_groups):
     return json_dumps(dict(
@@ -315,7 +321,7 @@ class AdminHandler(webapp.RequestHandler):
 class RestError(Exception):
   pass
 
-class RestHandler(webapp.RequestHandler):
+class RestHandler(webapp2.RequestHandler):
   def post(self, mp_key):
     try:
       response = self.add_to_group(db.Key(mp_key), db.Key(self.request.get("group")))
@@ -342,7 +348,7 @@ class RestHandler(webapp.RequestHandler):
     mp.put()
     return {"previous_group": previous_group}
 
-class GroupRestHandler(webapp.RequestHandler):
+class GroupRestHandler(webapp2.RequestHandler):
   def post(self, group_key_str):
     try:
       response = self.set_group_name(db.Key(group_key_str), self.request.get("name"))
@@ -366,7 +372,7 @@ class GroupRestHandler(webapp.RequestHandler):
     group.name = name
     group.put()
 
-class SettingsRestHandler(webapp.RequestHandler):
+class SettingsRestHandler(webapp2.RequestHandler):
   def post(self):
     s = settings()
     if "twfy_api_key" in self.request.params:
@@ -377,20 +383,20 @@ class SettingsRestHandler(webapp.RequestHandler):
       s.favicon_url = self.request.get("favicon_url")
     s.put()
 
-class AdminListHandler(webapp.RequestHandler):
+class AdminListHandler(webapp2.RequestHandler):
   def get(self):
-    self.response.out.write(webapp.template.render("admin-list.html", {
+    self.response.out.write(jin.get_template("admin-list.html").render({
       "mps": MP.all().order("name").fetch(1000),
       "groups": MPGroup.all().order("__key__").fetch(1000),
     }))
 
-class AdminSettingsHandler(webapp.RequestHandler):
+class AdminSettingsHandler(webapp2.RequestHandler):
   def get(self):
-    self.response.out.write(webapp.template.render("admin-settings.html", {
+    self.response.out.write(jin.get_template("admin-settings.html").render({
       "settings": settings(),
     }))
 
-class CronNewMPs(webapp.RequestHandler):
+class CronNewMPs(webapp2.RequestHandler):
   def get(self):
     '''Find any MPs we don't have in the database, and add them.
     '''
@@ -437,7 +443,7 @@ class CronNewMPs(webapp.RequestHandler):
     if not MPGroup.get_by_key_name("Default"):
       MPGroup(key_name="Default", name="Default").put()
 
-class CronUpdateMPs(webapp.RequestHandler):
+class CronUpdateMPs(webapp2.RequestHandler):
   def get(self):
     '''Update all the MPs in the database from theyworkforyou, in case any have left or changed position.
     '''
@@ -459,7 +465,7 @@ class CronUpdateMPs(webapp.RequestHandler):
       
       q.with_cursor(q.cursor())
 
-class TaskUpdateMP(webapp.RequestHandler):
+class TaskUpdateMP(webapp2.RequestHandler):
   def post(self, twfy_person_id_str):
     '''Update the details of the MP with the person_id specified in the URL.
     '''
@@ -514,7 +520,7 @@ class TaskUpdateMP(webapp.RequestHandler):
   def get(self, twfy_person_id_str):
     self.response.out.write("<form method='POST'><input type='submit' value='Update'></form>")
 
-# class TaskTwoWeeksLater(webapp.RequestHandler):
+# class TaskTwoWeeksLater(webapp2.RequestHandler):
 #   def post(self):
 #     email, name = self.request.get("email"), self.request.get("name")
 #     
@@ -523,18 +529,18 @@ class TaskUpdateMP(webapp.RequestHandler):
 #       sender = "", # <- PUT YOUR SENDER ADDRESS HERE
 #       reply_to = "mpresponse@lighterlater.org",
 #       to = email,
-#       body = template.render("email/two-weeks-later.txt",  {"name": name, "email": email}),
-#       html = template.render("email/two-weeks-later.html", {"name": name, "email": email}),
+#       body = jin.get_template("email/two-weeks-later.txt").render({"name": name, "email": email}),
+#       html = jin.get_template("email/two-weeks-later.html").render({"name": name, "email": email}),
 #     )
 #     logging.info("Sent 'two weeks later' email to %s <%s>", name, email)
 
-class AdminSentHandler(webapp.RequestHandler):
+class AdminSentHandler(webapp2.RequestHandler):
   def get(self):
-    self.response.out.write(webapp.template.render("admin-sent.html", {
+    self.response.out.write(jin.get_template("admin-sent.html").render({
       "letters": MPLetter.all().order("t_created"),
     }))
 
-class FaviconHandler(webapp.RequestHandler):
+class FaviconHandler(webapp2.RequestHandler):
   def get(self):
     url = favicon_url()
     if url:
@@ -542,29 +548,24 @@ class FaviconHandler(webapp.RequestHandler):
     else:
       self.error(404)
 
-def main():
-  handlers = [
-    (r'/mp/write', PageHandler),
-    (r'/mp/letter-sent', LetterSentHandler),
-    
-    (r'/mp/admin', AdminHandler),
-    (r'/mp/admin/list', AdminListHandler),
-    (r'/mp/admin/settings', AdminSettingsHandler),
-    (r'/mp/key/(.+)', RestHandler),
-    (r'/mp/group/(.+)', GroupRestHandler),
-    (r'/mp/settings', SettingsRestHandler),
-    (r'/mp/admin/sent', AdminSentHandler),
-    
-    (r'/mp/cron/new_mps', CronNewMPs),
-    (r'/mp/cron/update_mps', CronUpdateMPs),
-    (r'/mp/cron/task/update_mp/(\d+)', TaskUpdateMP),
-    
-    (r'/favicon\.ico', FaviconHandler),
-    
-#    (r'/mp/task/two-weeks-later', TaskTwoWeeksLater),
-  ]
-  webapp.util.run_wsgi_app(
-    webapp.WSGIApplication(handlers, debug=False))
 
-if __name__ == '__main__':
-  main()
+app = webapp2.WSGIApplication([
+  (r'/mp/write', PageHandler),
+  (r'/mp/letter-sent', LetterSentHandler),
+  
+  (r'/mp/admin', AdminHandler),
+  (r'/mp/admin/list', AdminListHandler),
+  (r'/mp/admin/settings', AdminSettingsHandler),
+  (r'/mp/key/(.+)', RestHandler),
+  (r'/mp/group/(.+)', GroupRestHandler),
+  (r'/mp/settings', SettingsRestHandler),
+  (r'/mp/admin/sent', AdminSentHandler),
+  
+  (r'/mp/cron/new_mps', CronNewMPs),
+  (r'/mp/cron/update_mps', CronUpdateMPs),
+  (r'/mp/cron/task/update_mp/(\d+)', TaskUpdateMP),
+  
+  (r'/favicon\.ico', FaviconHandler),
+  
+#    (r'/mp/task/two-weeks-later', TaskTwoWeeksLater),
+])

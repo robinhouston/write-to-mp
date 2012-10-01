@@ -9,9 +9,10 @@ import urllib2
 sys.path += [
   "/usr/local/google_appengine",
   "/usr/local/google_appengine/lib/yaml/lib",
-  "/usr/local/google_appengine/lib/django",
   "/usr/local/google_appengine/lib/fancy_urllib",
-  "/usr/local/google_appengine/lib/webob",
+  "/usr/local/google_appengine/lib/webob_1_1_1",
+  "/usr/local/google_appengine/lib/webapp2",
+  "/usr/local/google_appengine/lib/jinja2",
 ]
 
 # Local application path
@@ -99,7 +100,7 @@ if username is None:
   username = raw_input('Username: ')
 if password is None:
   password = getpass.getpass('Password: ')
-remote_api_stub.ConfigureRemoteDatastore(APP_ID, '/remote_api', auth_func, host)
+remote_api_stub.ConfigureRemoteDatastore(None, '/_ah/remote_api', auth_func, host)
 
 from mp import handlers as mps
 os.environ["USER_EMAIL"] = "" # Otherwise the dev appserver can have assertion failures

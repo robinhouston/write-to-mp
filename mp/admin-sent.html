@@ -17,7 +17,7 @@
     <div class="row" id="{{ letter.key }}">
       <span class="name">
         {{ letter.name }} &lt;{{ letter.writer_email }}&gt;<br>
-        {{ letter.t_created|date:"r" }}
+        {{ letter.t_created.strftime("%r") }}
       </span>
       <span class="letter">{{ letter.body|linebreaksbr }}</span>
     </div>
