@@ -470,7 +470,7 @@ class CronUpdateMPs(webapp2.RequestHandler):
     
     if mp.twfy_member_id != int(twfy_mp["member_id"]):
       changed = True
-      print >>self.response.out, "\Member ID changed from %d to %d" % (mp.twfy_member_id, int(twfy_mp["member_id"]))
+      print >>self.response.out, "\tMember ID changed from %d to %d" % (mp.twfy_member_id, int(twfy_mp["member_id"]))
       mp.twfy_member_id = int(twfy_mp["member_id"])
     
     positions = self._positions(twfy_mp)
