@@ -76,6 +76,7 @@ name, email address and postcode.
 At its most basic, you can just go to http://your-app-id.appspot.com/mp/admin and put in some
 text. If you want your advice to be shown as collapsible sections that can be expanded by
 clicking, you have to format it in a specific way, like this:
+
     1. First collapsible section
     
         * bullet point, which can have a whole paragraph of text.
