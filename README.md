@@ -105,7 +105,8 @@ since it relies on their service for sending the messages.
 ## Customising the appearance
 
 The appearance of the pages can be customised by editing the master template `mp/template.html`
-and the style sheet `styles/common.css`.
+and the style sheet `styles/common.css`. The templates use the [Jinja2](http://jinja.pocoo.org/docs/templates/)
+template language.
 
 ### History
 
