@@ -468,6 +468,11 @@ class CronUpdateMPs(webapp2.RequestHandler):
       print >>self.response.out, "\tConstituency changed from '%s' to '%s'" % (mp.constituency, twfy_mp["constituency"])
       mp.constituency = twfy_mp["constituency"]
     
+    if mp.twfy_member_id != int(twfy_mp["member_id"]):
+      changed = True
+      print >>self.response.out, "\Member ID changed from %d to %d" % (mp.twfy_member_id, int(twfy_mp["member_id"]))
+      mp.twfy_member_id = int(twfy_mp["member_id"])
+    
     positions = self._positions(twfy_mp)
     if positions != mp.positions:
       changed = True
