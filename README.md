@@ -91,14 +91,6 @@ a star is crucial. You may have to use some trial-and-error to get it right!
 You should also edit the introductory text to explain your campaign, on
 the settings page at http://your-app-id.appspot.com/mp/admin/settings.
 
-You can test the change on your computer before deploying it, by going to
-http://localhost:8080/mp/enter in your web browser. If the page is blank or
-you see an error message, that probably means the template has been messed
-up somehow. If you can't work out how to fix it, you can download the original
-version of the enter.html file [here](https://github.com/robinhouston/write-to-mp/raw/master/mp/enter.html)
-(right-click on that link and choose to download it), and copy it over the
-messed-up one.
-
 ### Grouping MPs
 
 You can also create groups of MPs, by clicking the "New group" button and entering
