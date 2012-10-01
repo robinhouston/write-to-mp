@@ -29,7 +29,7 @@ The rest of these instructions assume you want to install it as a separate appli
 
 ### See if it works on your computer
 
-1. If you're using Windows, install [Python 2.5](http://www.python.org/ftp/python/2.5.4/python-2.5.4.msi). (If you're using a Mac or Linux, it is probably installed already, so you can skip this step.)
+1. If you're using Windows, install [Python 2.7](http://www.python.org/download/releases/2.7.3/). (If you're using a Mac or Linux, it is probably installed already, so you can skip this step.)
 2. Download the [Google App Engine SDK for Python](http://code.google.com/appengine/downloads.html#Google_App_Engine_SDK_for_Python) and install it on your computer.
 3. Run the Google App Engine Launcher.
 4. Choose "Add existing application", and select the directory containing this application.
