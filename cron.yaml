@@ -1,5 +1,3 @@
 cron:
   - url: /mp/cron/update_mps
     schedule: every sunday 01:00
-  - url: /mp/cron/new_mps
-    schedule: every sunday 03:00

@@ -54,7 +54,7 @@ the list of MPs as of 1 October 2012.
    http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application,
    which you chose in step 1.
 6. Tell the application to download the list of MPs from TheyWorkForYou by going to
-   http://your-app-id.appspot.com/mp/cron/new_mps
+   http://your-app-id.appspot.com/mp/cron/update_mps
    You will have to log in using your Google account at this point. If this step works
    correctly, you will see the message "Fetching new MPs in the background".
 7. You can monitor the progress of the download by loading http://your-app-id.appspot.com/mp/admin/list

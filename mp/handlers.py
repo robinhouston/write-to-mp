@@ -1,4 +1,5 @@
-import datetime
+# -*- encoding: utf-8 -*-
+
 import json
 import logging
 import os
@@ -9,9 +10,7 @@ import urllib
 import jinja2
 import webapp2
 
-from google.appengine.api import mail
 from google.appengine.api import urlfetch
-from google.appengine.api import taskqueue
 from google.appengine.ext import db
 
 APP_DIR = os.path.dirname(__file__)
@@ -396,129 +395,108 @@ class AdminSettingsHandler(webapp2.RequestHandler):
       "settings": settings(),
     }))
 
-class CronNewMPs(webapp2.RequestHandler):
-  def get(self):
-    '''Find any MPs we don't have in the database, and add them.
-    '''
-    db.run_in_transaction(self._ensure_default_mp_group)
-    
-    url = "http://www.theyworkforyou.com/api/getMPs?"+ urllib.urlencode({
-      "key": twfy_api_key(),
-    })
-    result = urlfetch.fetch(url, None, urlfetch.GET)
-    if result.status_code != 200:
-      raise Exception("Failed to fetch MP details (status %s)" % (result.status_code,))
-  
-    assert result.headers["content-type"] == "text/javascript; charset=iso-8859-1"
-    mps = json.loads(result.content.decode("latin-1").encode("utf-8"))
-    
-    if "error" in mps:
-      logging.error("Error fetching new MPs: %s", mps["error"])
-      self.response.headers["Content-type"] = "text/plain; charset=utf-8"
-      self.response.out.write("Error: " + mps["error"])
-      return
-    
-    tasks = []
-
-    while mps:
-      this_batch, mps = mps[:200], mps[200:]
-      key_names = [ "twfy_person_id=%d" % int(mp["person_id"]) for mp in this_batch ]
-      entities = MP.get_by_key_name(key_names)
-      for i in range(len(key_names)):
-        if not entities[i]:
-          tasks.append(taskqueue.Task(
-            url = "/mp/cron/task/update_mp/%d" % (int(this_batch[i]["person_id"]),),
-            payload = None,
-          ))
-    
-    queue = taskqueue.Queue("mp")
-    while tasks:
-      this_batch, tasks = tasks[:100], tasks[100:]
-      queue.add(this_batch)
-    
-    self.response.headers["Content-type"] = "text/plain; charset=utf-8"
-    self.response.out.write("Fetching new MPs in the background")
-  
-  def _ensure_default_mp_group(self):
-    if not MPGroup.get_by_key_name("Default"):
-      MPGroup(key_name="Default", name="Default").put()
 
 class CronUpdateMPs(webapp2.RequestHandler):
   def get(self):
     '''Update all the MPs in the database from theyworkforyou, in case any have left or changed position.
     '''
-    queue = taskqueue.Queue("mp")
-    q = MP.all()
-    while True:
-      mps = q.fetch(100)
-      
-      queue.add([
-        taskqueue.Task(
-          url = "/mp/cron/task/update_mp/%d" % (mp.twfy_person_id,),
-          payload = None,
-        )
-        for mp in mps
-      ])
-      
-      if len(mps) < 100:
-        break
-      
-      q.with_cursor(q.cursor())
-
-class TaskUpdateMP(webapp2.RequestHandler):
-  def post(self, twfy_person_id_str):
-    '''Update the details of the MP with the person_id specified in the URL.
-    '''
-    twfy_person_id = int(twfy_person_id_str)
+    self.response.headers["Content-type"] = "text/plain; charset=utf-8"
+    print >>self.response.out, "Updating list of MPs"
+    print >>self.response.out, "--------------------"
+    print >>self.response.out
     
-    url = "http://www.theyworkforyou.com/api/getMP?"+ urllib.urlencode({
+    def _ensure_default_mp_group():
+      if not MPGroup.get_by_key_name("Default"):
+        MPGroup(key_name="Default", name="Default").put()
+    db.run_in_transaction(_ensure_default_mp_group)
+    
+    print >>self.response.out, "Fetching the list of MPs from TheyWorkForYou..."
+    url = "http://www.theyworkforyou.com/api/getMPs?"+ urllib.urlencode({
       "key": twfy_api_key(),
-      "output": "js",
-      "id": str(twfy_person_id),
+      "output": "js"
     })
     result = urlfetch.fetch(url, None, urlfetch.GET, deadline=60)
     if result.status_code != 200:
-      raise Exception("MP lookup failed for person_id %d", twfy_person_id)
-
-    mp_info = json.loads(result.content.decode("latin-1").encode("utf-8"))[0]
-    mp_key = db.Key.from_path("MP", "twfy_person_id=%d" % (twfy_person_id,))
+      raise Exception("Failed to fetch list of MPs from TheyWorkForYou")
+    twfy_mps = json.loads(result.content.decode("latin-1").encode("utf-8"))
     
-    if mp_info["left_reason"] != "still_in_office":
-      logging.info("MP %s (%s) has left office: %s", mp_info["full_name"], mp_info["constituency"], mp_info["left_reason"])
-      db.delete(mp_key)
+    mps_by_twfy_person_id = {}
+    for twfy_mp in twfy_mps:
+      mps_by_twfy_person_id[int(twfy_mp["person_id"])] = twfy_mp
+    print >>self.response.out
+    
+    print >>self.response.out, "Checking existing MPs to see if anything has changed..."
+    print >>self.response.out
+    for mp in MP.all():
+      print >>self.response.out, "Checking %s (%s)..." % (mp.name, mp.constituency)
+      if mp.twfy_person_id not in mps_by_twfy_person_id:
+        print >>self.response.out, u"\tNOT IN TWFY LIST – assuming they have left office"
+        logging.info("MP %s (%s) has left office", mp.name, mp.constituency)
+        db.delete(mp.key())
+        continue
       
-    else:
-      office = mp_info.get("office")
-      if office:
-        positions = [
-          position["position"] + (", " + position["dept"] if position.get("dept") else "")
-          for position in office
-        ]
-      else:
-        positions = []
-      
-      logging.info("mp_info = %s", mp_info)
-      db.run_in_transaction(self._update_mp, mp_key,
-        default_mp_group = MPGroup.get_by_key_name("Default"),
-        twfy_member_id = int(mp_info["member_id"]),
-        twfy_person_id = int(mp_info["person_id"]),
-        name = mp_info["full_name"],
-        party = mp_info["party"],
-        constituency = mp_info["constituency"],
-        positions = positions,
-      )
+      twfy_mp = mps_by_twfy_person_id.pop(mp.twfy_person_id)
+      db.run_in_transaction(self._update_mp, mp.key(), twfy_mp)
+    print >>self.response.out
+    
+    # New MPs
+    print >>self.response.out, "Adding new MPs..."
+    default_mp_group = MPGroup.get_by_key_name("Default")
+    for twfy_mp in mps_by_twfy_person_id.values():
+      print >>self.response.out, "New MP %s (%s)" % (twfy_mp["name"], twfy_mp["constituency"])
+      logging.info("New MP %s (%s)", twfy_mp["name"], twfy_mp["constituency"])
+      db.run_in_transaction(self._new_mp, twfy_mp, default_mp_group)
+    print >>self.response.out
+    
+    print >>self.response.out, "All done!"
   
-  def _update_mp(self, key, default_mp_group, **kwargs):
-    entity = db.get(key)
-    if entity:
-      for name, value in kwargs.items():
-        setattr(entity, name, value)
-      entity.put()
-    else:
-      MP(key_name=key.name(), group=default_mp_group, **kwargs).put()
+  def _update_mp(self, key, twfy_mp):
+    mp = db.get(key)
+    changed = False
+    if mp.name != twfy_mp["name"]:
+      changed = True
+      print >>self.response.out, "\tName changed from '%s' to '%s'" % (mp.name, twfy_mp["name"])
+      mp.name = twfy_mp["name"]
+    
+    if mp.party != twfy_mp["party"]:
+      changed = True
+      print >>self.response.out, "\tParty changed from '%s' to '%s'" % (mp.party, twfy_mp["party"])
+      mp.party = twfy_mp["party"]
+    
+    if mp.constituency != twfy_mp["constituency"]:
+      changed = True
+      print >>self.response.out, "\tConstituency changed from '%s' to '%s'" % (mp.constituency, twfy_mp["constituency"])
+      mp.constituency = twfy_mp["constituency"]
+    
+    positions = self._positions(twfy_mp)
+    if positions != mp.positions:
+      changed = True
+      print >>self.response.out, "\tPositions changed from '%r' to '%r'" % (mp.positions, positions)
+      mp.positions = positions
+    
+    if changed:
+      mp.put()
   
-  def get(self, twfy_person_id_str):
-    self.response.out.write("<form method='POST'><input type='submit' value='Update'></form>")
+  def _new_mp(self, twfy_mp, default_mp_group):
+    MP(
+      key_name="twfy_person_id=" + twfy_mp["person_id"],
+      group=default_mp_group,
+      twfy_member_id = int(twfy_mp["member_id"]),
+      twfy_person_id = int(twfy_mp["person_id"]),
+      name = twfy_mp["name"],
+      party = twfy_mp["party"],
+      constituency = twfy_mp["constituency"],
+      positions = self._positions(twfy_mp),
+    ).put()
+  
+  def _positions(self, twfy_mp):
+    office = twfy_mp.get("office")
+    if office:
+      return [
+        position["position"] + (", " + position["dept"] if position.get("dept") else "")
+        for position in office
+      ]
+    return []
 
 # class TaskTwoWeeksLater(webapp2.RequestHandler):
 #   def post(self):
@@ -561,9 +539,7 @@ app = webapp2.WSGIApplication([
   (r'/mp/settings', SettingsRestHandler),
   (r'/mp/admin/sent', AdminSentHandler),
   
-  (r'/mp/cron/new_mps', CronNewMPs),
   (r'/mp/cron/update_mps', CronUpdateMPs),
-  (r'/mp/cron/task/update_mp/(\d+)', TaskUpdateMP),
   
   (r'/favicon\.ico', FaviconHandler),
   
