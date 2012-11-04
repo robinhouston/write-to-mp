@@ -100,12 +100,15 @@ class PageHandler(webapp2.RequestHandler):
       except urlfetch.DownloadError:
         self.redirect(self.request.url)
         return
+    
+    mp, advice, mysociety_serialized_variables = None, None, None
+    template_path = "enter.html"
+    
     if mp_json:
       mp = json.loads(mp_json)
-      if "error" in mp:
-        template_path = "enter.html"
-        advice, mysociety_serialized_variables, intro_text_html = None, None, None
-      else:
+      if mp == {}:
+        mp["error"] = "Your constituency does not currently have an MP"
+      elif "error" not in mp:
         template_path = "write.html"
         mysociety_serialized_variables = self.get_mysociety_serialized_variables(self.request.get("postcode"))
         
@@ -122,12 +125,9 @@ class PageHandler(webapp2.RequestHandler):
       
         blurb = group.blurb
         advice = md_convert(blurb) if blurb else ""
-        intro_text_html = None
-    else:
-      template_path = "enter.html"
-      mp, advice, mysociety_serialized_variables = None, None, None
-      intro_text_md = settings().intro_markdown
-      intro_text_html = md_convert(intro_text_md) if intro_text_md else None
+    
+    intro_text_md = settings().intro_markdown
+    intro_text_html = md_convert(intro_text_md) if intro_text_md else None
     
     template_vars = {
       "mp_json": mp_json,
