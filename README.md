@@ -100,8 +100,9 @@ the list interface and choosing the appropriate group from the dropdown menu.
 
 ### Finally
 
-Before running a campaign you should check that <team@writetothem.com> are happy with it,
-since it relies on their service for sending the messages.
+Before running a campaign you should read http://www.writetothem.com/about-guidelines
+and contact WriteToThem to check they are happy with it, since it relies on their
+service for sending the messages.
 
 ## Customising the appearance
 
