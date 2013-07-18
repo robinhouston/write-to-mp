@@ -23,9 +23,16 @@
             div.removeClass("error");
           }
         });
-        if (ok) {
-          $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id }}');
-        }
+        /* If you wish to store a copy of the message the user has written,
+           uncomment the code immediately below. Please note that WriteToThem
+           has a strict privacy policy for its service - see
+           http://www.writetothem.com/about-privacy - and if you use this
+           functionality, please inform your users you will be keeping a copy
+           of their message and for what purpose/ how long you will be doing so.
+        */
+        // if (ok) {
+        //   $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id }}');
+        // }
         return ok;
       });
       
