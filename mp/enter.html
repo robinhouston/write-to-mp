@@ -1,5 +1,5 @@
 {% extends "template.html" %}
-{% block title %} Write to your MP{% endblock %}
+{% block title %} Write to your {{ representative_type }}{% endblock %}
 {% block body_attrs %}class="mp-enter"{% endblock %}
 {% block head %}
   {% if change_postcode %}
@@ -12,7 +12,7 @@
 {% endblock %}
 {% block body %}
   <div id="instructions">
-    <h2>Why email your MP?</h2>
+    <h2>Why email your {{ representative_type }}?</h2>
     
     {% if intro_text %}
       {{ intro_text }}
@@ -43,7 +43,7 @@
         <input type="text" class="mpform-field" id="mpform-postcode" name="postcode" value="{{ postcode }}">
       </div>
       <div>
-        <input type="submit" class="mpform-submit" name="submit" value="Find my MP">
+        <input type="submit" class="mpform-submit" name="submit" value="Find my {{ representative_type }}">
       </div>
     </form>
   </div>

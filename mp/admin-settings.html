@@ -17,6 +17,10 @@
         $.post("/mp/settings", {"twfy_api_key": $(this).val()});
         return true;
       });
+      $("#representative_type").change(function() {
+        $.post("/mp/settings", {"representative_type": $(this).val()});
+        return true;
+      });
       $("#intro_markdown").keyup(function() {
         $.post("/mp/settings", {"intro_markdown": $(this).val()});
         return true;
@@ -35,6 +39,12 @@
     {% if settings.twfy_api_key == "UNSET" %}
       <p>You need to get an API key from <a href="http://www.theyworkforyou.com/api/key" target="twfy">TheyWorkForYou</a>, and paste it below.<br>{% endif %}
     <input id="twfy_api_key" type="text" name="twfy_api_key" value="{{ settings.twfy_api_key }}">
+    
+    <h2>Parliament</h2>
+    <select id="representative_type" name="representative_type">
+        <option value="MP" {% if settings.representative_type == "MP" %}selected{% endif %}>Westminster</option>
+        <option value="MSP" {% if settings.representative_type == "MSP" %}selected{% endif %}>Holyrood</option>
+    </select>
     
     <h2>Introductory text</h2>
     <textarea id="intro_markdown">{{ settings.intro_markdown }}</textarea>

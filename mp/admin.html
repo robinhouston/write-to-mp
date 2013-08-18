@@ -1,5 +1,5 @@
 {% extends "template.html" %}
-{% block title %}MP Admin{% endblock %}
+{% block title %}{{ settings.representative_type }} Admin{% endblock %}
 {% block body_attrs %}class="admin mp-admin"{% endblock %}
 {% block head %}
   <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
@@ -123,7 +123,7 @@
               // This MP already belongs to a non-default group
               var current_group = all_mps[mp]["group"];
               if (group != default_group && !confirm(
-                "This MP is currently in " + groups[current_group] + ". Move to " + groups[group] + "?"
+                "This {{ settings.representative_type }} is currently in " + groups[current_group] + ". Move to " + groups[group] + "?"
               )) {
                 return;
               }
@@ -188,44 +188,48 @@
   </script>
 {% endblock %}
 {% block body %}
-  <h1>Members of Parliament</h1>
-    {% if error %}
-      <div class="error">{{ error }}</div>
-    {% endif %}
-    <form id="mp-group-form" method="POST" action="/mp/admin">
-      <div id="group-menu-container">
-        <label for="mp-group">Group: </label>
-        <select name="group" id="mp-group">
-          {% for mp_group in mp_groups %}
-            <option value="{{ mp_group.key() }}"
-            {% if group_to_select == mp_group.key() %}selected="selected"{% endif %}
-            >{{ mp_group.name }}</option>
-          {% endfor %}
-        </select>
-        <div class="rename"><span>(<a href="#">rename</a>)</span></div>
-      </div>
-      <div id="new-group">
-        <input type="text" name="new-group-name">
-        <input type="submit" name="action" value="New group">
-      </div>
-      <div>
-      <div id="blurb-help">The informational text below is formatted using <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples" target="_blank">Markdown</a>.</div>
-      <textarea id="blurb" name="blurb"></textarea>
-      </div>
-      <input type="submit" name="action" value="Save changes">
-      <input id="delete-button" type="submit" name="action" value="Delete this group">
-      <div id="number-of-mps-in-group"></div>
-    </form>
-    <div id="mps">
-      <div id="mps-in-group" class="ui-corner-all"></div>
-      <div>
-        <form id="add-mp-to-group">
-          <input type="text" id="mp-name" name="mp-name" value="Type here to add an MP to the group">
-        </form>
-      </div>
+  {% if settings.representative_type == "MP" %}
+    <h1>Members of Parliament</h1>
+  {% else %}
+    <h1>Members of the Scottish Parliament</h1>
+  {% endif %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  <form id="mp-group-form" method="POST" action="/mp/admin">
+    <div id="group-menu-container">
+      <label for="mp-group">Group: </label>
+      <select name="group" id="mp-group">
+        {% for mp_group in mp_groups %}
+          <option value="{{ mp_group.key() }}"
+          {% if group_to_select == mp_group.key() %}selected="selected"{% endif %}
+          >{{ mp_group.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="rename"><span>(<a href="#">rename</a>)</span></div>
     </div>
-    <div id="default-group">
-      This is the default group, which includes all MPs not explicitly placed in a different group.
+    <div id="new-group">
+      <input type="text" name="new-group-name">
+      <input type="submit" name="action" value="New group">
     </div>
-    <div id="link-to-list"><a href="/mp/admin/list">Go to a list of all MPs instead</a></div>
+    <div>
+    <div id="blurb-help">The informational text below is formatted using <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples" target="_blank">Markdown</a>.</div>
+    <textarea id="blurb" name="blurb"></textarea>
+    </div>
+    <input type="submit" name="action" value="Save changes">
+    <input id="delete-button" type="submit" name="action" value="Delete this group">
+    <div id="number-of-mps-in-group"></div>
+  </form>
+  <div id="mps">
+    <div id="mps-in-group" class="ui-corner-all"></div>
+    <div>
+      <form id="add-mp-to-group">
+        <input type="text" id="mp-name" name="mp-name" value="Type here to add an {{ settings.representative_type }} to the group">
+      </form>
+    </div>
+  </div>
+  <div id="default-group">
+    This is the default group, which includes all {{ settings.representative_type }}s not explicitly placed in a different group.
+  </div>
+  <div id="link-to-list"><a href="/mp/admin/list">Go to a list of all {{ settings.representative_type }}s instead</a></div>
 {% endblock %}

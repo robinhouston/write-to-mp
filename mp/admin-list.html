@@ -1,5 +1,5 @@
 {% extends "template.html" %}
-{% block title %}MP List{% endblock %}
+{% block title %}{{ settings.representative_type }} List{% endblock %}
 {% block body_attrs %}class="admin mp-admin-list"{% endblock %}
 {% block head %}
   <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
@@ -65,58 +65,63 @@
   </script>
 {% endblock %}
 {% block body %}
-  <h1>Members of Parliament</h1>
-    {% if error %}
-      <div class="error">{{ error }}</div>
-    {% endif %}
-    <div id="group-summary">
-      <table>
-        <thead>
+  {% if settings.representative_type == "MP" %}
+    <h1>Members of Parliament</h1>
+  {% else %}
+    <h1>Members of the Scottish Parliament</h1>
+  {% endif %}
+  
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  <div id="group-summary">
+    <table>
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Number of {{ settings.representative_type }}s</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in groups %}
           <tr>
-            <th>Group</th>
-            <th>Number of MPs</th>
+            <td>{{ group.name }}</td>
+            <td class="count" id="count-{{ group.key() }}">calculating&hellip;</td>
           </tr>
-        </thead>
-        <tbody>
-          {% for group in groups %}
-            <tr>
-              <td>{{ group.name }}</td>
-              <td class="count" id="count-{{ group.key() }}">calculating&hellip;</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <form id="mp-list-form" method="POST">
-      <div id="link-to-groups"><a href="/mp/admin">Edit groups instead</a></div>
-      <table>
-        <thead>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form id="mp-list-form" method="POST">
+    <div id="link-to-groups"><a href="/mp/admin">Edit groups instead</a></div>
+    <table>
+      <thead>
+        <tr>
+          <th>{{ settings.representative_type }}</th>
+          <th>Constituency</th>
+          <th>Party</th>
+          <th>Group</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mp in mps %}
           <tr>
-            <th>MP</th>
-            <th>Constituency</th>
-            <th>Party</th>
-            <th>Group</th>
+            <td>{{ mp.name }}{% if mp.positions %}&nbsp;<a class="positions" href="#" onclick="return false" title="{% for p in mp.positions %}{{ p }}{% if not loop.last %}<br>{% endif %}{% endfor %}">&#x272A;</a>
+            {% endif %}</td>
+            <td>{{ mp.constituency }}</td>
+            <td>{{ mp.party }}</td>
+            <td>
+              <select class="mp-group" name="{{ mp.key() }}">
+                {% for group in groups %}
+                  <option value="{{ group.key() }}"
+                  {% if group.key() == mp.group_key() %}selected="selected"{% endif %}
+                  >{{ group.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for mp in mps %}
-            <tr>
-              <td>{{ mp.name }}{% if mp.positions %}&nbsp;<a class="positions" href="#" onclick="return false" title="{% for p in mp.positions %}{{ p }}{% if not loop.last %}<br>{% endif %}{% endfor %}">&#x272A;</a>
-              {% endif %}</td>
-              <td>{{ mp.constituency }}</td>
-              <td>{{ mp.party }}</td>
-              <td>
-                <select class="mp-group" name="{{ mp.key() }}">
-                  {% for group in groups %}
-                    <option value="{{ group.key() }}"
-                    {% if group.key() == mp.group_key() %}selected="selected"{% endif %}
-                    >{{ group.name }}</option>
-                  {% endfor %}
-                </select>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </form>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
 {% endblock %}

@@ -34,16 +34,12 @@ md = markdown.Markdown()
 
 class Settings(db.Model):
   twfy_api_key = db.StringProperty(default="UNSET")
+  representative_type = db.StringProperty(default="MP", choices=["MP", "MSP"])
   favicon_url = db.TextProperty(default="")
   intro_markdown = db.TextProperty(default="")
 
 def settings():
   return Settings.get_by_key_name("settings") or Settings(key_name="settings")
-
-def twfy_api_key():
-  return settings().twfy_api_key
-def favicon_url():
-  return settings().favicon_url
 
 # Data
 
@@ -101,21 +97,25 @@ class PageHandler(webapp2.RequestHandler):
         self.redirect(self.request.url)
         return
     
+    representative_type = settings().representative_type
     mp, advice, mysociety_serialized_variables = None, None, None
     template_path = "enter.html"
     
     if mp_json:
       mp = json.loads(mp_json)
+      if isinstance(mp, list):
+        # For MSPs we get a list of representatives. Take the first.
+        mp = mp[0]
       if mp == {}:
-        mp["error"] = "Your constituency does not currently have an MP"
+        mp["error"] = "Your constituency does not currently have an " + representative_type
       elif "error" not in mp:
         template_path = "write.html"
         mysociety_serialized_variables = self.get_mysociety_serialized_variables(self.request.get("postcode"))
         
-        logging.info("Getting blurb for MP with person_id %d", int(mp["person_id"]))
+        logging.info("Getting blurb for %s with person_id %d", representative_type, int(mp["person_id"]))
         mp_entities = MP.all().filter("twfy_person_id =", int(mp["person_id"])).fetch(1)
         if not mp_entities:
-          logging.error("Could not find MP with person_id %s. Using default blurb.", mp["person_id"])
+          logging.error("Could not find %s with person_id %s. Using default blurb.", representative_type, mp["person_id"])
           group = MPGroup.get_by_key_name("Default")
           if not group:
             group = MPGroup(key_name="Default", name="Default")
@@ -136,7 +136,8 @@ class PageHandler(webapp2.RequestHandler):
       "advice": advice,
       "not_your_mp_href": self.request.url + "&change-postcode=1",
       "change_postcode": bool(self.request.get("change-postcode")),
-      "intro_text": intro_text_html
+      "intro_text": intro_text_html,
+      "representative_type": representative_type,
     }
     template_vars.update(self.request.params)
     self.response.out.write(jin.get_template(template_path).render(template_vars))
@@ -145,8 +146,9 @@ class PageHandler(webapp2.RequestHandler):
     postcode = self.request.get("postcode")
     if not postcode:
       return None
-    url = "http://www.theyworkforyou.com/api/getMP?"+ urllib.urlencode({
-      "key": twfy_api_key(),
+    representative_type = settings().representative_type
+    url = "http://www.theyworkforyou.com/api/get"+representative_type+"?"+ urllib.urlencode({
+      "key": settings().twfy_api_key,
       "output": "js",
       "postcode": postcode
     })
@@ -157,8 +159,10 @@ class PageHandler(webapp2.RequestHandler):
     return result.content.decode("latin-1").encode("utf-8")
   
   def get_mysociety_serialized_variables(self, postcode):
+    representative_type = settings().representative_type
+    wtt_representative_type = {"MP": "westminstermp", "MSP": "regionalmp"}[representative_type]
     url = "http://www.writetothem.com/?" + urllib.urlencode({
-      "a": "westminstermp", "pc": postcode
+      "a": wtt_representative_type, "pc": postcode
     })
     
     # The urlfetch module does not correctly process this redirect
@@ -174,6 +178,19 @@ class PageHandler(webapp2.RequestHandler):
     result = urlfetch.fetch(new_location, follow_redirects=False, deadline=10)
     if result.status_code != 200:
       raise Exception("Unexpected code %s from %s" % (result.status_code, new_location))
+    
+    # for MSPs, WriteToThem will return a list of regional MSPs as well as the actual
+    # constituency MSP for the postcode. Follow the first /write link, which is the
+    # user’s constituency MSP.
+    if representative_type == "MSP":
+      mo = re.search(r'<a href="(/write\?[^"]+)">', result.content)
+      if not mo:
+        raise Exception("Could not find <a href=\"/write?...\"> in %s" % (new_location,))
+      new_location = "http://www.writetothem.com" + mo.group(1)
+      result = urlfetch.fetch(new_location, follow_redirects=False, deadline=10)
+      if result.status_code != 200:
+        raise Exception("Unexpected code %s from %s" % (result.status_code, new_location))
+    
     mo = re.search(r'<input name="mysociety_serialized_variables" type="hidden" value="([^"]+)">', result.content)
     if not mo:
       raise Exception("Could not find mysociety_serialized_variables in %s" % (new_location))
@@ -241,6 +258,7 @@ class AdminHandler(webapp2.RequestHandler):
       "js_all_mps": js_all_mps,
       "default_group": db.Key.from_path("MPGroup", "Default"),
       "error": self.__error,
+      "settings": settings(),
     }
     self.response.out.write(jin.get_template("admin.html").render(template_vars))
   
@@ -376,6 +394,8 @@ class SettingsRestHandler(webapp2.RequestHandler):
     s = settings()
     if "twfy_api_key" in self.request.params:
       s.twfy_api_key = self.request.get("twfy_api_key")
+    if "representative_type" in self.request.params:
+      s.representative_type = self.request.get("representative_type")
     if "intro_markdown" in self.request.params:
       s.intro_markdown = self.request.get("intro_markdown")
     if "favicon_url" in self.request.params:
@@ -387,6 +407,7 @@ class AdminListHandler(webapp2.RequestHandler):
     self.response.out.write(jin.get_template("admin-list.html").render({
       "mps": MP.all().order("name").fetch(1000),
       "groups": MPGroup.all().order("__key__").fetch(1000),
+      "settings": settings(),
     }))
 
 class AdminSettingsHandler(webapp2.RequestHandler):
@@ -400,6 +421,7 @@ class CronUpdateMPs(webapp2.RequestHandler):
   def get(self):
     '''Update all the MPs in the database from theyworkforyou, in case any have left or changed position.
     '''
+    representative_type = settings().representative_type
     self.response.headers["Content-type"] = "text/plain; charset=utf-8"
     print >>self.response.out, "Updating list of MPs"
     print >>self.response.out, "--------------------"
@@ -410,14 +432,14 @@ class CronUpdateMPs(webapp2.RequestHandler):
         MPGroup(key_name="Default", name="Default").put()
     db.run_in_transaction(_ensure_default_mp_group)
     
-    print >>self.response.out, "Fetching the list of MPs from TheyWorkForYou..."
-    url = "http://www.theyworkforyou.com/api/getMPs?"+ urllib.urlencode({
-      "key": twfy_api_key(),
+    print >>self.response.out, "Fetching the list of "+representative_type+"s from TheyWorkForYou..."
+    url = "http://www.theyworkforyou.com/api/get"+representative_type+"s?"+ urllib.urlencode({
+      "key": settings().twfy_api_key,
       "output": "js"
     })
     result = urlfetch.fetch(url, None, urlfetch.GET, deadline=60)
     if result.status_code != 200:
-      raise Exception("Failed to fetch list of MPs from TheyWorkForYou")
+      raise Exception("Failed to fetch list of "+representative_type+"s from TheyWorkForYou")
     twfy_mps = json.loads(result.content.decode("latin-1").encode("utf-8"))
     
     mps_by_twfy_person_id = {}
@@ -425,13 +447,13 @@ class CronUpdateMPs(webapp2.RequestHandler):
       mps_by_twfy_person_id[int(twfy_mp["person_id"])] = twfy_mp
     print >>self.response.out
     
-    print >>self.response.out, "Checking existing MPs to see if anything has changed..."
+    print >>self.response.out, "Checking existing "+representative_type+"s to see if anything has changed..."
     print >>self.response.out
     for mp in MP.all():
       print >>self.response.out, "Checking %s (%s)..." % (mp.name, mp.constituency)
       if mp.twfy_person_id not in mps_by_twfy_person_id:
         print >>self.response.out, u"\tNOT IN TWFY LIST – assuming they have left office"
-        logging.info("MP %s (%s) has left office", mp.name, mp.constituency)
+        logging.info("%s %s (%s) has left office", representative_type, mp.name, mp.constituency)
         db.delete(mp.key())
         continue
       
@@ -439,12 +461,12 @@ class CronUpdateMPs(webapp2.RequestHandler):
       db.run_in_transaction(self._update_mp, mp.key(), twfy_mp)
     print >>self.response.out
     
-    # New MPs
-    print >>self.response.out, "Adding new MPs..."
+    # New M(S)Ps
+    print >>self.response.out, "Adding new "+representative_type+"s..."
     default_mp_group = MPGroup.get_by_key_name("Default")
     for twfy_mp in mps_by_twfy_person_id.values():
-      print >>self.response.out, "New MP %s (%s)" % (twfy_mp["name"], twfy_mp["constituency"])
-      logging.info("New MP %s (%s)", twfy_mp["name"], twfy_mp["constituency"])
+      print >>self.response.out, "New "+representative_type+" %s (%s)" % (twfy_mp["name"], twfy_mp["constituency"])
+      logging.info("New %s %s (%s)", representative_type, twfy_mp["name"], twfy_mp["constituency"])
       db.run_in_transaction(self._new_mp, twfy_mp, default_mp_group)
     print >>self.response.out
     
@@ -525,7 +547,7 @@ class AdminSentHandler(webapp2.RequestHandler):
 
 class FaviconHandler(webapp2.RequestHandler):
   def get(self):
-    url = favicon_url()
+    url = settings().favicon_url
     if url:
       self.redirect(url)
     else:

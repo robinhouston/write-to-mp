@@ -39,7 +39,7 @@ The rest of these instructions assume you want to install it as a separate appli
 **For advanced users**: There is a test data set distributed with this code, in the file
 `data/test-data.sqlite`. You can tell the dev appserver to use this data file by passing
 the command-line options `--use_sqlite --datastore_path=data/test-data.sqlite`. This contains
-the list of MPs as of 1 October 2012.
+the list of Westminster MPs as of 1 October 2012.
 
 ### Get the real thing working
 
@@ -49,11 +49,12 @@ the list of MPs as of 1 October 2012.
 3. Click the Deploy button in the Google App Engine Launcher.
 4. Go to the settings page at http://your-app-id.appspot.com/mp/admin/settings, and put in your
    TheyWorkForYouAPI key (obtained in Basic Setup above). This is also the page where you will
-   edit the introductory text for your campaign.
+   edit the introductory text for your campaign. If you are targetting the Scottish Parliament,
+   change the parliament setting from Westminster to Holyrood at this point.
 5. Check you can see the page you looked at on your computer by going to
    http://your-app-id.appspot.com/mp/write, replacing `your-app-id` with the id of your application,
    which you chose in step 1.
-6. Tell the application to download the list of MPs from TheyWorkForYou by going to
+6. Tell the application to download the list of MPs or MSPs from TheyWorkForYou by going to
    http://your-app-id.appspot.com/mp/cron/update_mps
    You will have to log in using your Google account at this point. If this step works
    correctly, you will see the message "Fetching new MPs in the background".
