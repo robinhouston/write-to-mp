@@ -8,6 +8,7 @@
     .name, .letter { display: inline-block; }
     .name { width: 350px; vertical-align: top; }
     .postcode { margin-left: 20px; font-size: 80%; }
+    .opted_in { color: red; font-weight: bold; }
     .letter { overflow: auto; width: 500px; height: 200px; background: white; border: 1px solid gray; }
   </style>
 {% endblock %}
@@ -22,6 +23,7 @@
           {{ user.t_created.strftime("%Y-%m-%d %r") }}
         </span>
         <span class="postcode">{{ user.postcode }}</span>
+        <span class="opted_in">{% if user.opted_in %}✓{% endif %}</span>
       </div>
     {% endfor %}
   {% elif settings.store_what == "letter" %}
@@ -31,6 +33,7 @@
           {{ letter.name }} &lt;{{ letter.writer_email }}&gt;<br>
           {{ letter.t_created.strftime("%Y-%m-%d %r") }}
         </span>
+        <span class="opted_in">{% if letter.writer_opted_in %}✓{% endif %}</span>
         <span class="letter">{{ letter.body|linebreaksbr }}</span>
       </div>
     {% endfor %}

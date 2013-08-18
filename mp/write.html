@@ -26,10 +26,11 @@
         if (ok) {
           {% if store_what == "name_email_and_postcode" %}
             $.post("/mp/letter-sent", {
-              name: "{{ name }}", email: "{{ email }}", postcode: "{{ postcode }}"
+              name: "{{ name }}", email: "{{ email }}",
+              postcode: "{{ postcode }}", opted_in: "{{ opt_in }}"
             });
           {% elif store_what == "letter" %}
-            $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id }}');
+            $.post("/mp/letter-sent", form.serialize() + '&mp_person_id={{ mp.person_id }}&writer_opted_in={{ opt_in }}');
           {% endif %}
         }
         return ok;

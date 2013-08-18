@@ -42,6 +42,10 @@
         <label for="mpform-postcode"{% if change_postcode %} class="highlighted"{% endif %}>Your postcode:</label>
         <input type="text" class="mpform-field" id="mpform-postcode" name="postcode" value="{{ postcode }}">
       </div>
+      {% if opt_in_checkbox_text %}
+        <input type="checkbox" class="mpform-field" id="mpform-opt_in" name="opt_in" {% if opt_in %}checked{% endif %}>
+        <label for="mpform-opt_in">{{ opt_in_checkbox_text }}</label>
+      {% endif %}
       <div>
         <input type="submit" class="mpform-submit" name="submit" value="Find my {{ representative_type }}">
       </div>

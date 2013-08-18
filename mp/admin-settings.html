@@ -7,6 +7,10 @@
     body { margin-bottom: 50px; }
     #twfy_api_key, #favicon_url { width: 400px; margin-top: 1em; }
     #intro_markdown { width: 800px; height: 400px; }
+    {% if settings.store_what == "nothing" %}
+      #additional_opt_in { display: none; }
+    {% endif %}
+    #opt_in_checkbox_text { width: 800px; }
     #save_div {margin-top: 2em;}
     #save {display: block; margin-top: 1em;}
   </style>
@@ -22,6 +26,10 @@
       }
       $("form input").keyup(saveSetting);
       $("form select").change(saveSetting);
+      $("#store_what").change(function() {
+        $("#additional_opt_in").toggle($(this).val() != "nothing");
+        return true;
+      });
     });
   </script>
 {% endblock %}
@@ -54,6 +62,12 @@
       <option value="letter" {% if settings.store_what == "letter" %}selected{% endif %}>The whole letter</option>
     </select>
     <p style="font-size: 80%;">Please note that WriteToThem has a strict <a href="http://www.writetothem.com/about-privacy">privacy policy for its service</a>: if you store the letters, please inform your users you will be keeping a copy of their message, for what purpose and for how long.</p>
+    
+    <div id="additional_opt_in">
+      <h2>Additional opt-in</h2>
+      <p>Optionally, you can add an extra check-box that you use for whatever purpose you choose.
+        Typically this would be an opt-in to a mailing list.</p>
+      <input id="opt_in_checkbox_text" name="opt_in_checkbox_text" value="{{ settings.opt_in_checkbox_text }}">
     
     <div id="save_div">
       All changes are auto-saved, so this button does not do anything.<br>

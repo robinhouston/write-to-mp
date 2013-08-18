@@ -38,6 +38,7 @@ class Settings(db.Model):
   favicon_url = db.StringProperty(default="")
   intro_markdown = db.TextProperty(default="")
   store_what = db.StringProperty(default="nothing", choices=["nothing", "name_email_and_postcode", "letter"])
+  opt_in_checkbox_text = db.StringProperty(default="")
 
 def settings():
   return Settings.get_by_key_name("settings") or Settings(key_name="settings")
@@ -48,6 +49,7 @@ class MPFormUser(db.Model):
   name = db.StringProperty()
   email = db.StringProperty()
   postcode = db.StringProperty()
+  opted_in = db.BooleanProperty(default=False)
   
   t_created = db.DateTimeProperty(required=True, auto_now_add=True)
   t_modified = db.DateTimeProperty(required=True, auto_now=True)
@@ -140,6 +142,7 @@ class PageHandler(webapp2.RequestHandler):
       "intro_text": intro_text_html,
       "representative_type": representative_type,
       "store_what": settings().store_what,
+      "opt_in_checkbox_text": settings().opt_in_checkbox_text,
     }
     template_vars.update(self.request.params)
     self.response.out.write(jin.get_template(template_path).render(template_vars))
@@ -207,7 +210,10 @@ class LetterSentHandler(webapp2.RequestHandler):
     
     store_what = settings().store_what
     if store_what == "name_email_and_postcode":
-      MPFormUser(name=p["name"], email=p["email"], postcode=p["postcode"]).put()
+      MPFormUser(
+        name=p["name"], email=p["email"], postcode=p["postcode"],
+        opted_in=bool(p["opted_in"])
+      ).put()
     
     elif store_what == "letter":
       mp_person_id = p.pop("mp_person_id")
@@ -400,16 +406,12 @@ class GroupRestHandler(webapp2.RequestHandler):
 class SettingsRestHandler(webapp2.RequestHandler):
   def post(self):
     s = settings()
-    if "twfy_api_key" in self.request.params:
-      s.twfy_api_key = self.request.get("twfy_api_key")
-    if "representative_type" in self.request.params:
-      s.representative_type = self.request.get("representative_type")
-    if "intro_markdown" in self.request.params:
-      s.intro_markdown = self.request.get("intro_markdown")
-    if "favicon_url" in self.request.params:
-      s.favicon_url = self.request.get("favicon_url")
-    if "store_what" in self.request.params:
-      s.store_what = self.request.get("store_what")
+    for setting_name in (
+      "twfy_api_key", "representative_type", "intro_markdown",
+      "favicon_url", "store_what", "opt_in_checkbox_text"
+    ):
+      if setting_name in self.request.params:
+        setattr(s, setting_name, self.request.get(setting_name))
     s.put()
 
 class AdminListHandler(webapp2.RequestHandler):
