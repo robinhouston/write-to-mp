@@ -13,22 +13,15 @@
   <script type="text/javascript">
     $(function() {
       $("form").submit(function() {return false;});
-      $("#twfy_api_key").keyup(function() {
-        $.post("/mp/settings", {"twfy_api_key": $(this).val()});
+      
+      function saveSetting() {
+        var d = {};
+        d[this.id] = $(this).val();
+        $.post("/mp/settings", d);
         return true;
-      });
-      $("#representative_type").change(function() {
-        $.post("/mp/settings", {"representative_type": $(this).val()});
-        return true;
-      });
-      $("#intro_markdown").keyup(function() {
-        $.post("/mp/settings", {"intro_markdown": $(this).val()});
-        return true;
-      });
-      $("#favicon_url").keyup(function() {
-        $.post("/mp/settings", {"favicon_url": $(this).val()});
-        return true;
-      });
+      }
+      $("form input").keyup(saveSetting);
+      $("form select").change(saveSetting);
     });
   </script>
 {% endblock %}
@@ -42,8 +35,8 @@
     
     <h2>Parliament</h2>
     <select id="representative_type" name="representative_type">
-        <option value="MP" {% if settings.representative_type == "MP" %}selected{% endif %}>Westminster</option>
-        <option value="MSP" {% if settings.representative_type == "MSP" %}selected{% endif %}>Holyrood</option>
+      <option value="MP" {% if settings.representative_type == "MP" %}selected{% endif %}>Westminster</option>
+      <option value="MSP" {% if settings.representative_type == "MSP" %}selected{% endif %}>Holyrood</option>
     </select>
     
     <h2>Introductory text</h2>
@@ -52,6 +45,15 @@
     <h2>Favicon URL</h2>
     <p>The URL of your favicon, if you have one.<br>
     <input id="favicon_url" type="text" name="favicon_url" value="{{ settings.favicon_url }}">
+    
+    <h2>Information to store</h2>
+    <p>What information do you want to store about your users?</p>
+    <select id="store_what" name="store_what">
+      <option value="nothing" {% if settings.store_what == "nothing" %}selected{% endif %}>Nothing</option>
+      <option value="name_email_and_postcode" {% if settings.store_what == "name_email_and_postcode" %}selected{% endif %}>Name, email address and postcode</option>
+      <option value="letter" {% if settings.store_what == "letter" %}selected{% endif %}>The whole letter</option>
+    </select>
+    <p style="font-size: 80%;">Please note that WriteToThem has a strict <a href="http://www.writetothem.com/about-privacy">privacy policy for its service</a>: if you store the letters, please inform your users you will be keeping a copy of their message, for what purpose and for how long.</p>
     
     <div id="save_div">
       All changes are auto-saved, so this button does not do anything.<br>

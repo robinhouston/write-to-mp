@@ -1,5 +1,5 @@
 {% extends "template.html" %}
-{% block title %}MP Letters sent{% endblock %}
+{% block title %}{{ settings.representative_type }} Letters sent{% endblock %}
 {% block body_attrs %}class="admin mp-admin-list"{% endblock %}
 {% block head %}
   <script type="text/javascript" src="/lib/jquery-ui/js/jquery-1.4.2.min.js"></script>
@@ -7,19 +7,32 @@
     .row { margin-bottom: 12px; }
     .name, .letter { display: inline-block; }
     .name { width: 350px; vertical-align: top; }
+    .postcode { margin-left: 20px; font-size: 80%; }
     .letter { overflow: auto; width: 500px; height: 200px; background: white; border: 1px solid gray; }
   </style>
 {% endblock %}
 {% block body %}
-  <h1>Letters sent to MPs</h1>
+  <h1>Letters sent to {{ settings.representative_type }}s</h1>
   
-  {% for letter in letters %}
-    <div class="row" id="{{ letter.key }}">
-      <span class="name">
-        {{ letter.name }} &lt;{{ letter.writer_email }}&gt;<br>
-        {{ letter.t_created.strftime("%r") }}
-      </span>
-      <span class="letter">{{ letter.body|linebreaksbr }}</span>
-    </div>
-  {% endfor %}
+  {% if settings.store_what == "name_email_and_postcode" %}
+    {% for user in users %}
+      <div class="row" id="{{ user.key }}">
+        <span class="name">
+          {{ user.name }} &lt;{{ user.email }}&gt;<br>
+          {{ user.t_created.strftime("%Y-%m-%d %r") }}
+        </span>
+        <span class="postcode">{{ user.postcode }}</span>
+      </div>
+    {% endfor %}
+  {% elif settings.store_what == "letter" %}
+    {% for letter in letters %}
+      <div class="row" id="{{ letter.key }}">
+        <span class="name">
+          {{ letter.name }} &lt;{{ letter.writer_email }}&gt;<br>
+          {{ letter.t_created.strftime("%Y-%m-%d %r") }}
+        </span>
+        <span class="letter">{{ letter.body|linebreaksbr }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock %}

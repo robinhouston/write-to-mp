@@ -37,6 +37,7 @@ class Settings(db.Model):
   representative_type = db.StringProperty(default="MP", choices=["MP", "MSP"])
   favicon_url = db.StringProperty(default="")
   intro_markdown = db.TextProperty(default="")
+  store_what = db.StringProperty(default="nothing", choices=["nothing", "name_email_and_postcode", "letter"])
 
 def settings():
   return Settings.get_by_key_name("settings") or Settings(key_name="settings")
@@ -138,6 +139,7 @@ class PageHandler(webapp2.RequestHandler):
       "change_postcode": bool(self.request.get("change-postcode")),
       "intro_text": intro_text_html,
       "representative_type": representative_type,
+      "store_what": settings().store_what,
     }
     template_vars.update(self.request.params)
     self.response.out.write(jin.get_template(template_path).render(template_vars))
@@ -202,10 +204,16 @@ class LetterSentHandler(webapp2.RequestHandler):
     for k, v in self.request.params.iteritems():
       p[str(k)] = unicode(v)
     logging.info(p)
-    mp_person_id = p.pop("mp_person_id")
-    logging.info("Getting MP with twfy_person_id=%s", mp_person_id)
-    mp_key = MP.all(keys_only=True).filter("twfy_person_id =", int(mp_person_id)).fetch(1)[0]
-    MPLetter(parent=mp_key, **p).put()
+    
+    store_what = settings().store_what
+    if store_what == "name_email_and_postcode":
+      MPFormUser(name=p["name"], email=p["email"], postcode=p["postcode"]).put()
+    
+    elif store_what == "letter":
+      mp_person_id = p.pop("mp_person_id")
+      logging.info("Getting MP with twfy_person_id=%s", mp_person_id)
+      mp_key = MP.all(keys_only=True).filter("twfy_person_id =", int(mp_person_id)).fetch(1)[0]
+      MPLetter(parent=mp_key, **p).put()
     
     # The 10:10 Lighter Later implementation sends an email message two weeks later
     # to anyone who has previewed a letter on WriteToThem, to ask whether they have
@@ -400,6 +408,8 @@ class SettingsRestHandler(webapp2.RequestHandler):
       s.intro_markdown = self.request.get("intro_markdown")
     if "favicon_url" in self.request.params:
       s.favicon_url = self.request.get("favicon_url")
+    if "store_what" in self.request.params:
+      s.store_what = self.request.get("store_what")
     s.put()
 
 class AdminListHandler(webapp2.RequestHandler):
@@ -542,7 +552,9 @@ class CronUpdateMPs(webapp2.RequestHandler):
 class AdminSentHandler(webapp2.RequestHandler):
   def get(self):
     self.response.out.write(jin.get_template("admin-sent.html").render({
+      "users": MPFormUser.all().order("t_created"),
       "letters": MPLetter.all().order("t_created"),
+      "settings": settings(),
     }))
 
 class FaviconHandler(webapp2.RequestHandler):
