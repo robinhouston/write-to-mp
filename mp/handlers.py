@@ -35,7 +35,7 @@ md = markdown.Markdown()
 class Settings(db.Model):
   twfy_api_key = db.StringProperty(default="UNSET")
   representative_type = db.StringProperty(default="MP", choices=["MP", "MSP"])
-  favicon_url = db.TextProperty(default="")
+  favicon_url = db.StringProperty(default="")
   intro_markdown = db.TextProperty(default="")
 
 def settings():
@@ -547,7 +547,7 @@ class AdminSentHandler(webapp2.RequestHandler):
 
 class FaviconHandler(webapp2.RequestHandler):
   def get(self):
-    url = settings().favicon_url
+    url = str(settings().favicon_url)
     if url:
       self.redirect(url)
     else:
