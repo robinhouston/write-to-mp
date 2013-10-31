@@ -24,7 +24,7 @@
         $.post("/mp/settings", d);
         return true;
       }
-      $("form input").keyup(saveSetting);
+      $("form input, form textarea").keyup(saveSetting);
       $("form select").change(saveSetting);
       $("#store_what").change(function() {
         $("#additional_opt_in").toggle($(this).val() != "nothing");
