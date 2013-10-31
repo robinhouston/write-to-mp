@@ -166,7 +166,7 @@ class PageHandler(webapp2.RequestHandler):
   def get_mysociety_serialized_variables(self, postcode):
     representative_type = settings().representative_type
     wtt_representative_type = {"MP": "westminstermp", "MSP": "regionalmp"}[representative_type]
-    url = "http://www.writetothem.com/?" + urllib.urlencode({
+    url = "https://www.writetothem.com/?" + urllib.urlencode({
       "a": wtt_representative_type, "pc": postcode
     })
     
@@ -178,7 +178,7 @@ class PageHandler(webapp2.RequestHandler):
     if not new_location.startswith("http://"):
       if not new_location.startswith("/"):
         new_location = "/" + new_location
-      new_location = "http://www.writetothem.com" + new_location
+      new_location = "https://www.writetothem.com" + new_location
     
     result = urlfetch.fetch(new_location, follow_redirects=False, deadline=10)
     if result.status_code != 200:
@@ -191,7 +191,7 @@ class PageHandler(webapp2.RequestHandler):
       mo = re.search(r'<a href="(/write\?[^"]+)">', result.content)
       if not mo:
         raise Exception("Could not find <a href=\"/write?...\"> in %s" % (new_location,))
-      new_location = "http://www.writetothem.com" + mo.group(1)
+      new_location = "https://www.writetothem.com" + mo.group(1)
       result = urlfetch.fetch(new_location, follow_redirects=False, deadline=10)
       if result.status_code != 200:
         raise Exception("Unexpected code %s from %s" % (result.status_code, new_location))

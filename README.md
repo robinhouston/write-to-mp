@@ -9,7 +9,7 @@ guidance about what to write. This advice can be different for different MPs: yo
 that you define, and present different advice depending on the group. For example, the appropriate advice may
 be different depending on the MPs past voting record on your particular issue.
 
-The user is directed to the MySociety [WriteToThem](http://www.writetothem.com/) site to send the message,
+The user is directed to the MySociety [WriteToThem](https://www.writetothem.com/) site to send the message,
 once they have composed it.
 
 ## How to install this application
@@ -101,7 +101,7 @@ the list interface and choosing the appropriate group from the dropdown menu.
 
 ### Finally
 
-Before running a campaign you should read http://www.writetothem.com/about-guidelines
+Before running a campaign you should read https://www.writetothem.com/about-guidelines
 and contact WriteToThem to check they are happy with it, since it relies on their
 service for sending the messages.
 
